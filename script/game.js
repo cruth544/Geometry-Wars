@@ -31,7 +31,6 @@ var createCharacter = {
   },
   triangle: function (size) {
     var t = this.init()
-
   },
   circle: function (size) {
     var c = this.init()

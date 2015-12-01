@@ -3,8 +3,8 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     drawThis.shape(shape1)
     drawThis.shape(shape2)
-    movePlayer1()
-    movePlayer2()
+    movePlayer(shape1)
+    movePlayer(shape2)
   }
 
 
@@ -35,43 +35,25 @@ var keyListener = (function () {
   }
 })()
 
-function movePlayer1 (player) {
+function movePlayer (player) {
   //up
-  if (keyListener.keyList()['87']) {
-    shape1.y += -2
+  if (keyListener.keyList()[player.controls.up]) {
+    player.y += -2
   }
   //down
-  if (keyListener.keyList()['83']) {
-    shape1.y += 2
+  if (keyListener.keyList()[player.controls.down]) {
+    player.y += 2
   }
   //left
-  if (keyListener.keyList()['65']) {
-    shape1.x += -2
+  if (keyListener.keyList()[player.controls.left]) {
+    player.x += -2
   }
   //right
-  if (keyListener.keyList()['68']) {
-    shape1.x += 2
+  if (keyListener.keyList()[player.controls.right]) {
+    player.x += 2
   }
 }
 
-function movePlayer2 (e) {
-  //up
-  if (keyListener.keyList()['38']) {
-    shape2.y += -2
-  }
-  //down
-  if (keyListener.keyList()['40']) {
-    shape2.y += 2
-  }
-  //left
-  if (keyListener.keyList()['37']) {
-    shape2.x += -2
-  }
-  //right
-  if (keyListener.keyList()['39']) {
-    shape2.x += 2
-  }
-}
 function printKeys() {
     var html = '';
     for (var i in keyListener.keyList()) {
