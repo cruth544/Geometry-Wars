@@ -23,6 +23,8 @@ var controls = (function () {
   }
 })()
 
+////////////////////////////////////////////////////////////////////////
+
 var createCharacter = (function () {
   //default values
   var speed = 2
@@ -98,6 +100,8 @@ var createCharacter = (function () {
   }
 })()
 
+////////////////////////////////////////////////////////////////////////
+
 var powerUps = (function () {
   function setReady (rate) {
     setTimeout(function () {
@@ -107,7 +111,7 @@ var powerUps = (function () {
 
   return {
     guns: {
-      standard: {size:    1,
+      standard: {size:    2,
                 speed:    4,
                 rate:     1,
                 isReady:  function () {setReady(this.rate)},
@@ -118,6 +122,8 @@ var powerUps = (function () {
     }
   }
 })()
+
+////////////////////////////////////////////////////////////////////////
 
 //keeps track of all objects on board
 var onGameBoard = (function () {
@@ -145,6 +151,8 @@ var onGameBoard = (function () {
   }
 })()
 
+////////////////////////////////////////////////////////////////////////
+
 function setStartPosition (player1, player2) {
   var x, y
   player1.x = c.canvas.width / 2
@@ -165,6 +173,7 @@ var shape2 = createCharacter.player('square', controls.player2)
 shape2.color = '#DD9500'
 startGame(shape2)
 
+////////////////////////////////////////////////////////////////////////
 var drawThis = (function () {
   // q is much shorter than c.ctx
   var q = c.ctx
@@ -206,6 +215,10 @@ var drawThis = (function () {
     //////////////////FIX, CIRCLE DOES NOT WORK////////////////////////
     circle: function (shape) {
       beginDraw(shape)
+      var dx =  Math.sin(shape.direction) * shape.speed
+      var dy = -Math.cos(shape.direction) * shape.speed
+      shape.x += dx
+      shape.y += dy
       q.arc(x, y, shape.size, 1, Math.PI * 2)
       endDraw(shape)
     },

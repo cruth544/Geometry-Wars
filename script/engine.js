@@ -47,6 +47,8 @@ function movePlayer (player) {
   var keys    = keyListener.keyList()
   var control = player.controls
   var counter = 0
+  var dx      =  Math.sin(player.rotate) * player.speed
+  var dy      = -Math.cos(player.rotate) * player.speed
   var d       = player.speed
   var diagonal   = Math.sqrt(Math.pow(d, 2) + Math.pow(d, 2)) / 2
   function setDiagonal () {
@@ -63,14 +65,14 @@ function movePlayer (player) {
         if (keys[control.left]) {
           player.rotate = -45 * Math.PI / 180
           setDiagonal()
-          player.x += -d
+          player.x += dx
         } else if (keys[control.right]) {
           player.rotate = 45 * Math.PI / 180
           setDiagonal()
-          player.x += d
+          player.x += dx
         }
       }
-      player.y += -d
+      player.y += dy
       return
     }
     if (keys[control.down]) {
@@ -79,27 +81,29 @@ function movePlayer (player) {
         if (keys[control.left]) {
           player.rotate = -135 * Math.PI / 180
           setDiagonal()
-          player.x += -d
+          player.x += dx
         } else if (keys[control.right]) {
           player.rotate = 135 * Math.PI / 180
           setDiagonal()
-          player.x += d
+          player.x += dx
         }
       }
-      player.y += d
+      player.y += dy
       return
     }
   }
   if (!(keys[control.left] && keys[control.right])) {
     if (keys[control.left]) {
       player.rotate = -90 * Math.PI / 180
-      player.x += -d
+      player.x += dx
     }
     if (keys[control.right]) {
       player.rotate = 90 * Math.PI / 180
-      player.x += d
+      player.x += dx
     }
   }
+  player.x += dx
+  player.y += dy
 }
 
 function printKeys() {
