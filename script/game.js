@@ -22,8 +22,10 @@ var controls = (function () {
 var createCharacter = {
   init: function () {
     var shape = {}
-    shape.x = 0
-    shape.y = 0
+    shape.x   = 0
+    shape.y   = 0
+    shape.dx  = 1
+    shape.dy  = 1
     shape.height
     shape.width
     shape.color

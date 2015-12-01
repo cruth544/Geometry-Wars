@@ -36,21 +36,20 @@ var keyListener = (function () {
 })()
 
 function movePlayer (player) {
-  //up
-  if (keyListener.keyList()[player.controls.up]) {
-    player.y += -2
+  var keys    = keyListener.keyList()
+  var control = player.controls
+
+  if (keys[control.up]) {
+    player.y += -player.dy
   }
-  //down
-  if (keyListener.keyList()[player.controls.down]) {
-    player.y += 2
+  if (keys[control.down]) {
+    player.y += player.dy
   }
-  //left
-  if (keyListener.keyList()[player.controls.left]) {
-    player.x += -2
+  if (keys[control.left]) {
+    player.x += -player.dx
   }
-  //right
-  if (keyListener.keyList()[player.controls.right]) {
-    player.x += 2
+  if (keys[control.right]) {
+    player.x += player.dx
   }
 }
 
