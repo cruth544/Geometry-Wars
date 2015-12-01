@@ -1,10 +1,12 @@
 
   function drawElements () {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    drawThis.shape(shape1)
     drawThis.shape(shape2)
+    drawThis.shape(shape1)
+    rotateShape(shape1)
     movePlayer(shape1)
     movePlayer(shape2)
+
   }
 
 
@@ -40,10 +42,9 @@ function movePlayer (player) {
   var control = player.controls
   var counter = 0
   var d       = player.speed
-  var diagonal   = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) / 2
+  var diagonal   = Math.sqrt(Math.pow(d, 2) + Math.pow(d, 2)) / 2
   function setDiagonal () {
-    dx = diagonal
-    dy = diagonal
+    d = diagonal
   }
 
   if (keys[control.shoot]) {
@@ -55,7 +56,7 @@ function movePlayer (player) {
     } else if (keys[control.right]) {
       setDiagonal()
     }
-    player.y += -dy
+    player.y += -d
   }
   if (keys[control.down]) {
     if (keys[control.left]) {
@@ -63,13 +64,13 @@ function movePlayer (player) {
     } else if (keys[control.right]) {
       setDiagonal()
     }
-    player.y += -dy
+    player.y += d
   }
   if (keys[control.left]) {
-    player.x += -dx
+    player.x += -d
   }
   if (keys[control.right]) {
-    player.x += dx
+    player.x += d
   }
 }
 
