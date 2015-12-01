@@ -22,12 +22,11 @@ var controls = (function () {
 var createCharacter = {
   init: function () {
     var shape = {}
-    shape.x   = 0
-    shape.y   = 0
-    shape.dx  = 1
-    shape.dy  = 1
-    shape.height
-    shape.width
+    shape.x       = 0
+    shape.y       = 0
+    shape.speed   = 1
+    shape.height  = 10
+    shape.width   = 10
     shape.color
     return shape
   },
@@ -35,7 +34,9 @@ var createCharacter = {
     var t = this.init()
   },
   circle: function (size) {
-    var c = this.init()
+    var c   = this.init()
+    c.size  = size
+    return c
   },
   player: function (controls) {
     var p       = this.init()
@@ -44,8 +45,17 @@ var createCharacter = {
     p.gun       = null //standard
     p.shield    = null //shield
     p.controls  = controls
+    p.shoot     = function () {
+      // body...
+    }
     onGameBoard.addCharacter(p)
     return p
+  },
+  bullet: function (size, speed) {
+    var b     = this.circle(1)
+    b.speed   = speed
+    b.size    = size
+    return b
   },
   enemy: function (value) {
     var e   = this.init()

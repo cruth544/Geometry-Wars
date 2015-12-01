@@ -38,18 +38,38 @@ var keyListener = (function () {
 function movePlayer (player) {
   var keys    = keyListener.keyList()
   var control = player.controls
+  var counter = 0
+  var d       = player.speed
+  var diagonal   = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) / 2
+  function setDiagonal () {
+    dx = diagonal
+    dy = diagonal
+  }
 
+  if (keys[control.shoot]) {
+    player.shoot()
+  }
   if (keys[control.up]) {
-    player.y += -player.dy
+    if (keys[control.left]) {
+      setDiagonal()
+    } else if (keys[control.right]) {
+      setDiagonal()
+    }
+    player.y += -dy
   }
   if (keys[control.down]) {
-    player.y += player.dy
+    if (keys[control.left]) {
+      setDiagonal()
+    } else if (keys[control.right]) {
+      setDiagonal()
+    }
+    player.y += -dy
   }
   if (keys[control.left]) {
-    player.x += -player.dx
+    player.x += -dx
   }
   if (keys[control.right]) {
-    player.x += player.dx
+    player.x += dx
   }
 }
 
