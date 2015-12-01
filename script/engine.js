@@ -1,16 +1,21 @@
 function drawElements () {
+  createCharacter.setFrameCounter()
   c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
   for (var i = onGameBoard.getAllCharacters().length - 1; i >= 0; i--) {
     var obj = onGameBoard.getAllCharacters()[i]
     drawThis[obj.shape](obj)
   }
-  // drawThis[shape2.shape](shape2)
-  // drawThis.shape(shape1)
-  // drawThis[shape1.shape](shape1)
-  movePlayer(shape1)
-  movePlayer(shape2)
+  shape1.shotIncrement()
+  shape2.shotIncrement()
+  bothPlayersDoThis(movePlayer)
 }
 
+function bothPlayersDoThis (callback) {
+  callback(shape1)
+  if (shape2) {
+    callback(shape2)
+  }
+}
 
 ////////////////////////////KEY LISTENERS///////////////////////////////
 $(document).keydown(function(e) {

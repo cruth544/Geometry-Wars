@@ -5,9 +5,6 @@ var c = (function () {
   }
 })()
 
-// var canvas  = $('#game')[0]
-// var ctx     = canvas.getContext('2d')
-
 var controls = (function () {
   return {
     player1: {
@@ -28,11 +25,15 @@ var controls = (function () {
 
 var createCharacter = (function () {
   //default values
+  var frameCounter = 0
   var speed = 2
   var size  = 20
   var lives = 3
 
   return {
+    setFrameCounter: function () {
+      frameCounter++
+    },
     init: function () {
       var shape = {}
       shape.shape   = 'circle'
@@ -57,24 +58,39 @@ var createCharacter = (function () {
       return cir
     },
     player: function (shape, controls) {
-      var p       = this.init()
-      p.shape     = shape
-      p.lives     = lives
-      p.score     = 0
-      p.gun       = null //standard
-      p.shield    = null //shield
-      p.controls  = controls
-      p.shoot     = function () {
-        createCharacter.bullet(1, 4)
+      var p         = this.init()
+      p.shape       = shape
+      p.lives       = lives
+      p.score       = 0
+      p.gun         = powerUps.guns.standard //standard
+      p.shield      = powerUps.shields.noShield //shield
+      p.controls    = controls
+      p.shotFrames  = 1
+      p.shotIncrement = function () {
+        p.shotFrames++
+      }
+      p.shoot       = function () {
+        if (p.shotFrames / (p.gun.rate * 60) >= 1) {
+          var bullet = createCharacter.bullet(p.gun,
+                                              p.rotate,
+                                              p.x - p.width / 2,
+                                              p.y - p.height / 2)
+          onGameBoard.addCharacter(bullet)
+          p.shotFrames = 0
+        }
       }
       onGameBoard.addCharacter(p)
       return p
     },
-    bullet: function (size, speed, direction) {
-      var b     = this.init
-      b.shape   = 'circle'
-      b.speed   = speed
-      b.size    = size
+    bullet: function (gun, direction, x, y) {
+      var b         = this.init()
+      b.shape       = 'circle'
+      b.size        = gun.size
+      b.speed       = gun.speed
+      b.rate        = gun.rate
+      b.x           = x
+      b.y           = y
+      b.direction   = direction
       return b
     },
     enemy: function (value) {
@@ -82,6 +98,27 @@ var createCharacter = (function () {
       e.value = value
       onGameBoard.addCharacter(e)
       return e
+    }
+  }
+})()
+
+var powerUps = (function () {
+  function setReady (rate) {
+    setTimeout(function () {
+      return true
+    }, rate * 1000)
+  }
+
+  return {
+    guns: {
+      standard: {size:    1,
+                speed:    4,
+                rate:     1,
+                isReady:  function () {setReady(this.rate)},
+                capacity: 99999999 }
+    },
+    shields: {
+      noShield: null
     }
   }
 })()
@@ -128,7 +165,7 @@ var shape1 = createCharacter.player('triangle', controls.player1)
 shape1.color = '#0095DD'
 startGame(shape1)
 
-var shape2 = createCharacter.player('diamond', controls.player2)
+var shape2 = createCharacter.player('square', controls.player2)
 shape2.color = '#DD9500'
 startGame(shape2)
 
