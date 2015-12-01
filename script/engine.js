@@ -1,13 +1,15 @@
-
-  function drawElements () {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    drawThis.shape(shape2)
-    drawThis.shape(shape1)
-    rotateShape(shape1)
-    movePlayer(shape1)
-    movePlayer(shape2)
-
+function drawElements () {
+  c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
+  for (var i = onGameBoard.getAllCharacters().length - 1; i >= 0; i--) {
+    var obj = onGameBoard.getAllCharacters()[i]
+    drawThis[obj.shape](obj)
   }
+  // drawThis[shape2.shape](shape2)
+  // drawThis.shape(shape1)
+  // drawThis[shape1.shape](shape1)
+  movePlayer(shape1)
+  movePlayer(shape2)
+}
 
 
 ////////////////////////////KEY LISTENERS///////////////////////////////
@@ -50,27 +52,35 @@ function movePlayer (player) {
   if (keys[control.shoot]) {
     player.shoot()
   }
+  if (keys[control.left]) {
+    player.rotate = -90 * Math.PI / 180
+    player.x += -d
+  }
+  if (keys[control.right]) {
+    player.rotate = 90 * Math.PI / 180
+    player.x += d
+  }
   if (keys[control.up]) {
+    player.rotate = 0
     if (keys[control.left]) {
+      player.rotate = -45 * Math.PI / 180
       setDiagonal()
     } else if (keys[control.right]) {
+      player.rotate = 45 * Math.PI / 180
       setDiagonal()
     }
     player.y += -d
   }
   if (keys[control.down]) {
+    player.rotate = Math.PI
     if (keys[control.left]) {
+      player.rotate = -135 * Math.PI / 180
       setDiagonal()
     } else if (keys[control.right]) {
+      player.rotate = 135 * Math.PI / 180
       setDiagonal()
     }
     player.y += d
-  }
-  if (keys[control.left]) {
-    player.x += -d
-  }
-  if (keys[control.right]) {
-    player.x += d
   }
 }
 
