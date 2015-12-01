@@ -25,15 +25,11 @@ var controls = (function () {
 
 var createCharacter = (function () {
   //default values
-  var frameCounter = 0
   var speed = 2
   var size  = 20
   var lives = 3
 
   return {
-    setFrameCounter: function () {
-      frameCounter++
-    },
     init: function () {
       var shape = {}
       shape.shape   = 'circle'
@@ -46,17 +42,17 @@ var createCharacter = (function () {
       shape.color
       return shape
     },
-    square: function (size) {
-      var s = this.init()
-    },
-    triangle: function (size) {
-      var t = this.init()
-    },
-    circle: function (size) {
-      var cir   = this.init()
-      cir.size  = size
-      return cir
-    },
+    // square: function (size) {
+    //   var s = this.init()
+    // },
+    // triangle: function (size) {
+    //   var t = this.init()
+    // },
+    // circle: function (size) {
+    //   var cir   = this.init()
+    //   cir.size  = size
+    //   return cir
+    // },
     player: function (shape, controls) {
       var p         = this.init()
       p.shape       = shape

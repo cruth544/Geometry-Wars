@@ -1,5 +1,4 @@
 function drawElements () {
-  createCharacter.setFrameCounter()
   c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
   for (var i = onGameBoard.getAllCharacters().length - 1; i >= 0; i--) {
     var obj = onGameBoard.getAllCharacters()[i]
@@ -57,35 +56,49 @@ function movePlayer (player) {
   if (keys[control.shoot]) {
     player.shoot()
   }
-  if (keys[control.left]) {
-    player.rotate = -90 * Math.PI / 180
-    player.x += -d
-  }
-  if (keys[control.right]) {
-    player.rotate = 90 * Math.PI / 180
-    player.x += d
-  }
-  if (keys[control.up]) {
-    player.rotate = 0
-    if (keys[control.left]) {
-      player.rotate = -45 * Math.PI / 180
-      setDiagonal()
-    } else if (keys[control.right]) {
-      player.rotate = 45 * Math.PI / 180
-      setDiagonal()
+  if (!(keys[control.up] && keys[control.down])) {
+    if (keys[control.up]) {
+      player.rotate = 0
+      if (!(keys[control.left] && keys[control.right])) {
+        if (keys[control.left]) {
+          player.rotate = -45 * Math.PI / 180
+          setDiagonal()
+          player.x += -d
+        } else if (keys[control.right]) {
+          player.rotate = 45 * Math.PI / 180
+          setDiagonal()
+          player.x += d
+        }
+      }
+      player.y += -d
+      return
     }
-    player.y += -d
-  }
-  if (keys[control.down]) {
-    player.rotate = Math.PI
-    if (keys[control.left]) {
-      player.rotate = -135 * Math.PI / 180
-      setDiagonal()
-    } else if (keys[control.right]) {
-      player.rotate = 135 * Math.PI / 180
-      setDiagonal()
+    if (keys[control.down]) {
+      player.rotate = Math.PI
+      if (!(keys[control.left] && keys[control.right])) {
+        if (keys[control.left]) {
+          player.rotate = -135 * Math.PI / 180
+          setDiagonal()
+          player.x += -d
+        } else if (keys[control.right]) {
+          player.rotate = 135 * Math.PI / 180
+          setDiagonal()
+          player.x += d
+        }
+      }
+      player.y += d
+      return
     }
-    player.y += d
+  }
+  if (!(keys[control.left] && keys[control.right])) {
+    if (keys[control.left]) {
+      player.rotate = -90 * Math.PI / 180
+      player.x += -d
+    }
+    if (keys[control.right]) {
+      player.rotate = 90 * Math.PI / 180
+      player.x += d
+    }
   }
 }
 
