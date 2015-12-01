@@ -61,37 +61,36 @@ function movePlayer (player) {
   if (!(keys[control.up] && keys[control.down])) {
     if (keys[control.up]) {
       player.rotate = 0
+
       if (!(keys[control.left] && keys[control.right])) {
         if (keys[control.left]) {
           player.rotate = -45 * Math.PI / 180
-          setDiagonal()
-          player.x += dx
+
         } else if (keys[control.right]) {
           player.rotate = 45 * Math.PI / 180
-          setDiagonal()
-          player.x += dx
         }
       }
+      player.x += dx
       player.y += dy
       return
     }
     if (keys[control.down]) {
       player.rotate = Math.PI
+
       if (!(keys[control.left] && keys[control.right])) {
         if (keys[control.left]) {
           player.rotate = -135 * Math.PI / 180
-          setDiagonal()
-          player.x += dx
+
         } else if (keys[control.right]) {
           player.rotate = 135 * Math.PI / 180
-          setDiagonal()
-          player.x += dx
         }
       }
+      player.x += dx
       player.y += dy
       return
     }
   }
+
   if (!(keys[control.left] && keys[control.right])) {
     if (keys[control.left]) {
       player.rotate = -90 * Math.PI / 180
@@ -102,8 +101,6 @@ function movePlayer (player) {
       player.x += dx
     }
   }
-  player.x += dx
-  player.y += dy
 }
 
 function printKeys() {
