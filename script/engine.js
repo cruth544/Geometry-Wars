@@ -4,7 +4,7 @@ function drawElements () {
     var obj = onGameBoard.getAllCharacters()[i]
     drawThis[obj.shape](obj)
   }
-
+  moveEnemies()
   shape1.shotIncrement()
   shape2.shotIncrement()
   bothPlayersDoThis(movePlayer)
@@ -25,8 +25,8 @@ function collisionHappening () {
   for (var i = 0; i < all.length; i++) {
     for (var j = 0; j < all.length; j++) {
       if (i === j) continue
-      if (all[j].type === 'bullet') {
-        if (outOfBounds(all[j])) {
+      if (outOfBounds(all[j])) {
+        if (all[j].type === 'bullet') {
           onGameBoard.removeCharacter(all[j])
           return
         }
@@ -162,10 +162,22 @@ function moveEnemies () {
   var array = onGameBoard.getAllCharacters()
   for (var i = 0; i < array.length; i++) {
     if (array[i].type === 'enemy') {
-      var dx =  Math.sin(Math.random() * 2 * Math.PI) * array[i].speed
-      var dy = -Math.cos(Math.random() * 2 * Math.PI) * array[i].speed
-      array[i].x += dx
-      array[i].y += dy
+      if (Math.random() > .95) {
+        var randomDirection = Math.random() * 2 * Math.PI
+        array[i].rotate = randomDirection
+        array[i].dx     =  Math.sin(randomDirection) * array[i].speed
+        array[i].dy     = -Math.cos(randomDirection) * array[i].speed
+      }
+      if (Math.random() > .3) {
+        array[i].x += array[i].dx
+        array[i].y += array[i].dy
+        if (outOfBounds(array[i])) {
+          array[i].x -= array[i].dx
+          array[i].y -= array[i].dy
+        }
+      } else if (Math.random() > .4) {
+
+      }
     }
   }
 }
@@ -180,7 +192,6 @@ function printKeys() {
 }
 
 drawElements()
-// setInterval(drawElements, 1000 / 60)
 
 
 

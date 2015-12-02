@@ -34,41 +34,59 @@ var createCharacter = (function () {
   return {
     init: function () {
       var shape = {}
-      shape.shape   = 'circle'
-      shape.x       = 0
-      shape.y       = 0
-      shape.speed   = speed
-      shape.height  = size
-      shape.width   = size
-      shape.rotate  = 0
+      shape.shape       = 'circle'
+      shape.x           = 0
+      shape.y           = 0
+      shape.speed       = speed
+      shape.height      = size
+      shape.width       = size
+      shape.rotate      = 0
+      shape.gun         = powerUps.guns.standard
+      shape.shield      = powerUps.shields.noShield
+      shape.shotFrames  = 1
+      shape.shotIncrement = function () {
+        shape.shotFrames++
+      }
+      shape.shoot       = function (s) {
+        if (s.shotFrames / (s.gun.rate * 60) >= 1) {
+          var bullet = createCharacter.bullet(s.gun,
+                                              s.rotate,
+                                              s.x - s.width / 2,
+                                              s.y - s.height / 2)
+          s.player = s
+          onGameBoard.addCharacter(bullet)
+          s.shotFrames = 0
+        }
+      }
       shape.color
       return shape
     },
     player: function (shape, controls) {
       var p         = this.init()
+      p.type        = 'player'
       p.shape       = shape
       p.lives       = lives
       p.score       = 0
-      p.gun         = powerUps.guns.standard //standard
-      p.shield      = powerUps.shields.noShield //shield
       p.controls    = controls
-      p.shotFrames  = 1
-      p.shotIncrement = function () {
-        p.shotFrames++
-      }
-      p.shoot       = function (player) {
-        if (p.shotFrames / (p.gun.rate * 60) >= 1) {
-          var bullet = createCharacter.bullet(p.gun,
-                                              p.rotate,
-                                              p.x - p.width / 2,
-                                              p.y - p.height / 2)
-          bullet.player = p
-          onGameBoard.addCharacter(bullet)
-          p.shotFrames = 0
-        }
-      }
+
       onGameBoard.addCharacter(p)
       return p
+      // p.gun         = powerUps.guns.standard //standard
+      // p.shield      = powerUps.shields.noShield //shield
+      // p.shotIncrement = function () {
+      //   p.shotFrames++
+      // }
+      // p.shoot       = function (player) {
+      //   if (p.shotFrames / (p.gun.rate * 60) >= 1) {
+      //     var bullet = createCharacter.bullet(p.gun,
+      //                                         p.rotate,
+      //                                         p.x - p.width / 2,
+      //                                         p.y - p.height / 2)
+      //     bullet.player = p
+      //     onGameBoard.addCharacter(bullet)
+      //     p.shotFrames = 0
+      //   }
+      // }
     },
     bullet: function (gun, direction, x, y) {
       var b         = this.init()
@@ -91,6 +109,8 @@ var createCharacter = (function () {
       e.value = value
       e.x     = x
       e.y     = y
+      e.dx    = e.speed
+      e.dy    = e.speed
       onGameBoard.addCharacter(e)
       return e
     }
@@ -181,7 +201,7 @@ shape2.color = '#DD9500'
 startGame(shape1, shape2)
 
 for (var i = 0; i < 10; i++) {
-  spawnEnemy('diamond', 30, 4, 10)
+  spawnEnemy('diamond', 30, 2, 10)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -245,6 +265,9 @@ var drawThis = (function () {
 })()
 
 function collisionBetween (a, b) {
+  if (a.type === 'player' && b.type === 'enemy') {
+    console.log('enemy hit player')
+  }
   if (a.type === 'bullet') {
     if (a.player !== b) {
       console.log(b.shape + ' got hit!!')
