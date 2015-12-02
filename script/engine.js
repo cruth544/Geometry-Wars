@@ -1,18 +1,54 @@
 function drawElements () {
   c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
-  for (var i = onGameBoard.getAllCharacters().length - 1; i >= 0; i--) {
+  for (var i = 0; i < onGameBoard.getAllCharacters().length; i++) {
     var obj = onGameBoard.getAllCharacters()[i]
     drawThis[obj.shape](obj)
   }
   shape1.shotIncrement()
   shape2.shotIncrement()
   bothPlayersDoThis(movePlayer)
+  collisionHappening()
 }
 
 function bothPlayersDoThis (callback) {
   callback(shape1)
   if (shape2) {
     callback(shape2)
+  }
+}
+
+function collisionHappening () {
+  var all = onGameBoard.getAllCharacters()
+  for (var i = 0; i < all.length; i++) {
+    for (var j = 0; j < all.length; j++) {
+      if (i === j) continue
+      if (all[j].type === 'bullet') {
+        if (outOfBounds(all[j])) {
+          onGameBoard.removeCharacter(all[j])
+          return
+        }
+      }
+      var a = { x: all[i].x, y: all[i].y,
+                w: all[i].width / 2, h: all[i].height / 2}
+      var b = { x: all[j].x, y: all[j].y,
+                w: all[j].width / 2, h: all[j].height / 2}
+
+      if (a.x + a.w > b.x - b.w && a.x - a.w < b.x + b.w) {
+        if (a.y + a.h > b.y - b.h && a.y - a.h < b.y + b.h) {
+          if (collisionBetween(all[i], all[j])) return
+        }
+      }
+    }
+  }
+}
+
+function outOfBounds (object) {
+  if (object.x + object.width / 2 < 0 ||
+      object.x + object.width / 2 > c.canvas.width) {
+    return true
+  } else if ( object.y + object.height < 0 ||
+              object.y + object.height > c.canvas.height) {
+    return true
   }
 }
 
@@ -49,15 +85,11 @@ function movePlayer (player) {
   var counter = 0
   var dx      =  Math.sin(player.rotate) * player.speed
   var dy      = -Math.cos(player.rotate) * player.speed
-  var d       = player.speed
-  var diagonal   = Math.sqrt(Math.pow(d, 2) + Math.pow(d, 2)) / 2
-  function setDiagonal () {
-    d = diagonal
-  }
 
   if (keys[control.shoot]) {
-    player.shoot()
+    player.shoot(player)
   }
+
   if (!(keys[control.up] && keys[control.down])) {
     if (keys[control.up]) {
       player.rotate = 0
@@ -72,6 +104,12 @@ function movePlayer (player) {
       }
       player.x += dx
       player.y += dy
+
+      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+        player.x -= dx
+        player.y -= dy
+        return
+      }
       return
     }
     if (keys[control.down]) {
@@ -87,6 +125,12 @@ function movePlayer (player) {
       }
       player.x += dx
       player.y += dy
+
+      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+        player.x -= dx
+        player.y -= dy
+        return
+      }
       return
     }
   }
@@ -95,10 +139,18 @@ function movePlayer (player) {
     if (keys[control.left]) {
       player.rotate = -90 * Math.PI / 180
       player.x += dx
+      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+        player.x -= dx
+        return
+      }
     }
     if (keys[control.right]) {
       player.rotate = 90 * Math.PI / 180
       player.x += dx
+      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+        player.x -= dx
+        return
+      }
     }
   }
 }

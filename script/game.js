@@ -67,12 +67,13 @@ var createCharacter = (function () {
       p.shotIncrement = function () {
         p.shotFrames++
       }
-      p.shoot       = function () {
+      p.shoot       = function (player) {
         if (p.shotFrames / (p.gun.rate * 60) >= 1) {
           var bullet = createCharacter.bullet(p.gun,
                                               p.rotate,
                                               p.x - p.width / 2,
                                               p.y - p.height / 2)
+          bullet.player = p
           onGameBoard.addCharacter(bullet)
           p.shotFrames = 0
         }
@@ -82,6 +83,7 @@ var createCharacter = (function () {
     },
     bullet: function (gun, direction, x, y) {
       var b         = this.init()
+      b.type        = 'bullet'
       b.shape       = 'circle'
       b.size        = gun.size
       b.speed       = gun.speed
@@ -89,11 +91,17 @@ var createCharacter = (function () {
       b.x           = x
       b.y           = y
       b.direction   = direction
+      b.player
       return b
     },
-    enemy: function (value) {
+    enemy: function (shape, size, speed, value, x, y) {
       var e   = this.init()
+      e.type  = 'enemy'
+      e.shape = shape
+      e.speed = speed
       e.value = value
+      e.x     = x
+      e.y     = y
       onGameBoard.addCharacter(e)
       return e
     }
@@ -141,7 +149,7 @@ var onGameBoard = (function () {
     },
     removeCharacter: function (character) {
       var index = this.getIndexForChar(character)
-      if (index < 0) {
+      if (index > 0) {
         activeCharacters.splice(index, 1)
       }
     },
@@ -155,23 +163,37 @@ var onGameBoard = (function () {
 
 function setStartPosition (player1, player2) {
   var x, y
-  player1.x = c.canvas.width / 2
+  player1.x = c.canvas.width / 2 - player1.width
   player1.y = c.canvas.height / 2
   if (arguments.length > 1) {
+    player2.x = c.canvas.width / 2 + player2.width
+    player2.y = c.canvas.height / 2
   }
 }
 
-function startGame (players) {
-  setStartPosition(players)
+function spawnEnemy (shape, size, speed, value) {
+  var shapes = ['diamond', 'square', 'triangle']
+  var randomShape = shapes[Math.random() * shapes.length]
+  var x = Math.random() * c.canvas.width + size
+  var y = Math.random() * c.canvas.height + size
+
+  createCharacter.enemy(shape, size, speed, value, x, y)
+}
+
+function startGame (player1, player2) {
+  setStartPosition(player1, player2)
 }
 
 var shape1 = createCharacter.player('triangle', controls.player1)
 shape1.color = '#0095DD'
-startGame(shape1)
 
 var shape2 = createCharacter.player('square', controls.player2)
 shape2.color = '#DD9500'
-startGame(shape2)
+startGame(shape1, shape2)
+
+for (var i = 0; i < 10; i++) {
+  spawnEnemy('diamond', 30, 4, 10)
+}
 
 ////////////////////////////////////////////////////////////////////////
 var drawThis = (function () {
@@ -233,6 +255,19 @@ var drawThis = (function () {
   }
 })()
 
+function collisionBetween (a, b) {
+  if (a.type === 'bullet') {
+    if (a.player !== b) {
+      console.log(b.shape + ' got hit!!')
+      if (b.type === 'enemy') {
+        console.log('BOOM!')
+        onGameBoard.removeCharacter(a)
+        onGameBoard.removeCharacter(b)
+        return true
+      }
+    }
+  }
+}
 
 
 
