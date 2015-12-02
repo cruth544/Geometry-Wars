@@ -71,22 +71,6 @@ var createCharacter = (function () {
 
       onGameBoard.addCharacter(p)
       return p
-      // p.gun         = powerUps.guns.standard //standard
-      // p.shield      = powerUps.shields.noShield //shield
-      // p.shotIncrement = function () {
-      //   p.shotFrames++
-      // }
-      // p.shoot       = function (player) {
-      //   if (p.shotFrames / (p.gun.rate * 60) >= 1) {
-      //     var bullet = createCharacter.bullet(p.gun,
-      //                                         p.rotate,
-      //                                         p.x - p.width / 2,
-      //                                         p.y - p.height / 2)
-      //     bullet.player = p
-      //     onGameBoard.addCharacter(bullet)
-      //     p.shotFrames = 0
-      //   }
-      // }
     },
     bullet: function (gun, direction, x, y) {
       var b         = this.init()
