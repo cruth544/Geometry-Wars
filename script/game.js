@@ -71,9 +71,15 @@ var createCharacter = (function () {
         if (hitter.type !== shape.type) {
           //check to see if hitter is a bullet
           if (hitter.type === 'bullet') {
-            //we don't want anything to happen if shape is shooting
-            if (hitter.player.type === shape.type) return
-            onGameBoard.removeCharacter(hitter)
+            //check for shape shooting itself
+            if (hitter.player === shape) return
+              //make sure there is no friendly fire
+            if (hitter.player.type === shape.type) {
+              onGameBoard.removeCharacter(hitter)
+              return
+            } else {
+              return
+            }
           } else {
           //if its not a bullet...
             hitter.hit(hitter)
@@ -338,13 +344,13 @@ function collisionBetween (a, b) {
 
 function checkWin (enemies) {
   if (enemies === 0) {
-    console.log('All enemies gone!')
+    // console.log('All enemies gone!')
   }
 }
 
 function checkLoss (players) {
   if (players === 0) {
-    console.log('All players dead!')
+    // console.log('All players dead!')
   }
 }
 

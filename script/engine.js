@@ -11,7 +11,7 @@ function drawElements () {
   collisionHappening()
   checkWin(enemiesLeft())
   checkLoss(playersLeft())
-  console.log(enemiesLeft())
+  // console.log(enemiesLeft())
 
   requestAnimationFrame(drawElements)
 }
