@@ -1,12 +1,14 @@
 function drawElements () {
+  var player1 = onGameBoard.player(1)
+  var player2 = onGameBoard.player(2)
   c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
   for (var i = 0; i < onGameBoard.getAllCharacters().length; i++) {
     var obj = onGameBoard.getAllCharacters()[i]
     drawThis[obj.shape](obj)
   }
   moveEnemies()
-  shape1.shotIncrement()
-  shape2.shotIncrement()
+  if (player1) player1.shotIncrement()
+  if (player2) player2.shotIncrement()
   bothPlayersDoThis(movePlayer)
   collisionHappening()
   checkWin(enemiesLeft())
@@ -17,9 +19,13 @@ function drawElements () {
 }
 
 function bothPlayersDoThis (callback) {
-  callback(shape1)
-  if (shape2) {
-    callback(shape2)
+  var player1 = onGameBoard.player(1)
+  var player2 = onGameBoard.player(2)
+  if (player1) {
+    callback(player1)
+  }
+  if (player2) {
+    callback(player2)
   }
 }
 
@@ -111,6 +117,9 @@ var keyListener = (function () {
 })()
 
 function movePlayer (player) {
+  if (!player) return
+  var player1 = onGameBoard.player(1)
+  var player2 = onGameBoard.player(2)
   var keys    = keyListener.keyList()
   var control = player.controls
   var counter = 0
@@ -140,7 +149,11 @@ function movePlayer (player) {
       player.x += dx
       player.y += dy
 
-      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+      if (outOfBounds(player)) {
+
+      }
+      if (player2 ? checkCollision(player1, player2) : false
+        || outOfBounds(player)) {
         player.x -= dx
         player.y -= dy
         return
@@ -161,7 +174,8 @@ function movePlayer (player) {
       player.x += dx
       player.y += dy
 
-      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+      if (player2 ? checkCollision(player1, player2) : false
+        || outOfBounds(player)) {
         player.x -= dx
         player.y -= dy
         return
@@ -174,7 +188,8 @@ function movePlayer (player) {
     if (keys[control.left]) {
       player.rotate = -90 * Math.PI / 180
       player.x += dx
-      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+      if (player2 ? checkCollision(player1, player2) : false
+        || outOfBounds(player)) {
         player.x -= dx
         return
       }
@@ -182,7 +197,8 @@ function movePlayer (player) {
     if (keys[control.right]) {
       player.rotate = 90 * Math.PI / 180
       player.x += dx
-      if (checkCollision(shape1, shape2) || outOfBounds(player)) {
+      if (player2 ? checkCollision(player1, player2) : false
+        || outOfBounds(player)) {
         player.x -= dx
         return
       }
@@ -226,7 +242,6 @@ function printKeys() {
 }
 
 drawElements()
-
 
 
 

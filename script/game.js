@@ -76,8 +76,9 @@ var createCharacter = (function () {
               //make sure there is no friendly fire
             if (hitter.player.type === shape.type) {
               onGameBoard.removeCharacter(hitter)
-              return
-            } else {
+              if (false) {//versus mode
+                onGameBoard.removeCharacter(shape)
+              }
               return
             }
           } else {
@@ -86,6 +87,7 @@ var createCharacter = (function () {
           }
           //do hit calculations
           shape.hit(shape)
+          hitter.hit(hitter)
         }
       }
       shape.color
@@ -115,7 +117,7 @@ var createCharacter = (function () {
       b.player
       return b
     },
-    enemy: function (shape, size, speed, x, y) {
+    enemy: function (shape, size, speed, life, x, y) {
       var e   = this.init()
       e.type  = 'enemy'
       e.shape = shape
@@ -124,6 +126,7 @@ var createCharacter = (function () {
       e.y     = y
       e.dx    = e.speed
       e.dy    = e.speed
+      e.life  = life
       onGameBoard.addCharacter(e)
       return e
     }
@@ -131,6 +134,7 @@ var createCharacter = (function () {
 })()
 
 ////////////////////////////////////////////////////////////////////////
+
 
 var powerUps = (function () {
   function setReady (rate) {
@@ -177,10 +181,29 @@ var onGameBoard = (function () {
     },
     getAllCharacters: function () {
       return activeCharacters
+    },
+    player: function (playerNumber) {
+      playerNumber--
+      if (activeCharacters[playerNumber].type === 'player') {
+        return activeCharacters[playerNumber]
+      }
     }
   }
 })()
 
+var players = (function () {
+  var player1 = createCharacter.player('triangle', controls.player1)
+  player1.color = '#0095DD'
+  var player2 = createCharacter.player('square', controls.player2)
+  player2.color = '#DD9500'
+  onGameBoard.addCharacter(player1)
+  onGameBoard.addCharacter(player2)
+  startGame(player1, player2)
+
+  return {
+
+  }
+})()
 ////////////////////////////////////////////////////////////////////////
 
 function setStartPosition (player1, player2) {
@@ -196,12 +219,19 @@ function setStartPosition (player1, player2) {
 function spawnEnemy (shape, size, speed, life, r, g, b) {
   var shapes = ['diamond', 'square', 'triangle']
   var randomShape = shapes[Math.random() * shapes.length]
-  var x = size + Math.random() * c.canvas.width - size
-  var y = size + Math.random() * c.canvas.height - size
-  if (Math.abs(shape1.x - x) < 60 || Math.abs(shape1.y - y) < 60) {
+  var x = Math.random() * (c.canvas.width - size)
+  var y = Math.random() * (c.canvas.height - size)
+  if (x < size) {
+    x + size
+  } else if (y < size) {
+    y + size
+  }
+  var player1 = onGameBoard.player(1)
+  var player2 = onGameBoard.player(2)
+  if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
     return spawnEnemy(shape, size, speed, life)
   }
-  if (Math.abs(shape2.x - x) < 60 || Math.abs(shape2.y - y) < 60) {
+  if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
     return spawnEnemy(shape, size, speed, life)
   }
   var enemy = createCharacter.enemy(shape, size, speed, life, x, y)
@@ -213,23 +243,25 @@ function spawnEnemy (shape, size, speed, life, r, g, b) {
   enemy.dy  = dy
 }
 
-function startGame (player1, player2) {
-  setStartPosition(player1, player2)
-}
-
-var shape1 = createCharacter.player('triangle', controls.player1)
-shape1.color = '#0095DD'
-
-var shape2 = createCharacter.player('square', controls.player2)
-shape2.color = '#DD9500'
-startGame(shape1, shape2)
-
 for (var i = 0; i < 10; i++) {
   var r = Math.round(Math.random() * 255)
   var g = Math.round(Math.random() * 255)
   var b = Math.round(Math.random() * 255)
   spawnEnemy('diamond', 30, 2, 1/*, r, g, b*/)
 }
+
+function startGame (player1, player2) {
+  setStartPosition(player1, player2)
+}
+
+
+// var shape1 = createCharacter.player('triangle', controls.player1)
+// shape1.color = '#0095DD'
+
+// var shape2 = createCharacter.player('square', controls.player2)
+// shape2.color = '#DD9500'
+// startGame(shape1, shape2)
+
 
 ////////////////////////////////////////////////////////////////////////
 var drawThis = (function () {
