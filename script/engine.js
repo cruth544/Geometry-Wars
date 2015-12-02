@@ -161,22 +161,24 @@ function movePlayer (player) {
 function moveEnemies () {
   var array = onGameBoard.getAllCharacters()
   for (var i = 0; i < array.length; i++) {
-    if (array[i].type === 'enemy') {
+    var enemy = array[i]
+    if (enemy.type === 'enemy') {
+      enemy.shotIncrement()
       if (Math.random() > .95) {
         var randomDirection = Math.random() * 2 * Math.PI
-        array[i].rotate = randomDirection
-        array[i].dx     =  Math.sin(randomDirection) * array[i].speed
-        array[i].dy     = -Math.cos(randomDirection) * array[i].speed
+        enemy.rotate = randomDirection
+        enemy.dx     =  Math.sin(randomDirection) * enemy.speed
+        enemy.dy     = -Math.cos(randomDirection) * enemy.speed
       }
       if (Math.random() > .3) {
-        array[i].x += array[i].dx
-        array[i].y += array[i].dy
-        if (outOfBounds(array[i])) {
-          array[i].x -= array[i].dx
-          array[i].y -= array[i].dy
+        enemy.x += enemy.dx
+        enemy.y += enemy.dy
+        if (outOfBounds(enemy)) {
+          enemy.x -= enemy.dx
+          enemy.y -= enemy.dy
         }
       } else if (Math.random() > .4) {
-
+        enemy.shoot(enemy)
       }
     }
   }

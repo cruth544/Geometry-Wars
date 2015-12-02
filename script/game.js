@@ -53,7 +53,7 @@ var createCharacter = (function () {
                                               s.rotate,
                                               s.x - s.width / 2,
                                               s.y - s.height / 2)
-          s.player = s
+          bullet.player = s
           onGameBoard.addCharacter(bullet)
           s.shotFrames = 0
         }
@@ -142,7 +142,7 @@ var onGameBoard = (function () {
     },
     removeCharacter: function (character) {
       var index = this.getIndexForChar(character)
-      if (index > 0) {
+      if (index >= 0) {
         activeCharacters.splice(index, 1)
       }
     },
@@ -226,8 +226,6 @@ var drawThis = (function () {
       q.lineTo(-x, y)
       endDraw(shape)
     },
-
-    //////////////////FIX, CIRCLE DOES NOT WORK////////////////////////
     circle: function (shape) {
       beginDraw(shape)
       var dx =  Math.sin(shape.direction) * shape.speed
@@ -251,12 +249,29 @@ var drawThis = (function () {
 function collisionBetween (a, b) {
   if (a.type === 'player' && b.type === 'enemy') {
     console.log('enemy hit player')
+    onGameBoard.removeCharacter(a)
+    return true
   }
+
+  // type a is a bullet
   if (a.type === 'bullet') {
+    // make sure that the collision is not the object shooting bullet
     if (a.player !== b) {
-      console.log(b.shape + ' got hit!!')
+      console.log(b.type + ' got hit!!')
+      // check if object hit is an enemy
       if (b.type === 'enemy') {
-        console.log('BOOM!')
+        // check that enemy did not hit another enemy
+        if (a.player.type !== b.type && b.type === 'enemy') {
+          console.log('BOOM!')
+          onGameBoard.removeCharacter(a)
+          onGameBoard.removeCharacter(b)
+          return true
+        }
+        //if it did hit an enemy, remove the bullet
+        onGameBoard.removeCharacter(a)
+        return true
+      } else if (b.type === 'player') {
+        console.log('DEAD!')
         onGameBoard.removeCharacter(a)
         onGameBoard.removeCharacter(b)
         return true
