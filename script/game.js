@@ -71,6 +71,8 @@ var createCharacter = (function () {
         if (hitter.type !== shape.type) {
           //check to see if hitter is a bullet
           if (hitter.type === 'bullet') {
+            //we don't want anything to happen if shape is shooting
+            if (hitter.player.type === shape.type) return
             onGameBoard.removeCharacter(hitter)
           } else {
           //if its not a bullet...
@@ -285,11 +287,11 @@ function collisionBetween (a, b) {
   //all cases where player is hit by something
   if (a.type === 'player') {
     if (b.type === 'enemy') {
-      a.hit(a, b)
+      a.onHit(a, b)
       return true
     }
     if (b.type === 'bullet') {
-      a.hit(a, b)
+      a.onHit(a, b)
       return true
     }
   }
@@ -297,17 +299,17 @@ function collisionBetween (a, b) {
   // all cases where enemy is hit by something
   if (a.type === 'enemy') {
     if (b.type === 'bullet') {
-      a.hit(a, b)
+      a.onHit(a, b)
       return true
     }
   }
 
-  // if (a.type === 'player' && b.type === 'enemy') {
-  //   a.hit(a, b)
-  //   return true
-  // }
-  //
-  // type a is a bullet
+  if (a.type === 'player' && b.type === 'enemy') {
+    a.onHit(a, b)
+    return true
+  }
+
+  //type a is a bullet
   // if (a.type === 'bullet') {
   //   // make sure that the collision is not the object shooting bullet
   //   if (a.player !== b) {
