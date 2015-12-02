@@ -44,17 +44,6 @@ var createCharacter = (function () {
       shape.color
       return shape
     },
-    // square: function (size) {
-    //   var s = this.init()
-    // },
-    // triangle: function (size) {
-    //   var t = this.init()
-    // },
-    // circle: function (size) {
-    //   var cir   = this.init()
-    //   cir.size  = size
-    //   return cir
-    // },
     player: function (shape, controls) {
       var p         = this.init()
       p.shape       = shape
@@ -174,8 +163,8 @@ function setStartPosition (player1, player2) {
 function spawnEnemy (shape, size, speed, value) {
   var shapes = ['diamond', 'square', 'triangle']
   var randomShape = shapes[Math.random() * shapes.length]
-  var x = Math.random() * c.canvas.width + size
-  var y = Math.random() * c.canvas.height + size
+  var x = Math.random() * c.canvas.width - size
+  var y = Math.random() * c.canvas.height - size
 
   createCharacter.enemy(shape, size, speed, value, x, y)
 }
@@ -241,7 +230,7 @@ var drawThis = (function () {
       var dy = -Math.cos(shape.direction) * shape.speed
       shape.x += dx
       shape.y += dy
-      q.arc(x, y, shape.size, 1, Math.PI * 2)
+      q.arc(x, y, shape.size, 0, Math.PI * 2)
       endDraw(shape)
     },
     diamond: function (shape) {

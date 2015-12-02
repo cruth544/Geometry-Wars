@@ -4,10 +4,13 @@ function drawElements () {
     var obj = onGameBoard.getAllCharacters()[i]
     drawThis[obj.shape](obj)
   }
+
   shape1.shotIncrement()
   shape2.shotIncrement()
   bothPlayersDoThis(movePlayer)
   collisionHappening()
+
+  requestAnimationFrame(drawElements)
 }
 
 function bothPlayersDoThis (callback) {
@@ -155,6 +158,18 @@ function movePlayer (player) {
   }
 }
 
+function moveEnemies () {
+  var array = onGameBoard.getAllCharacters()
+  for (var i = 0; i < array.length; i++) {
+    if (array[i].type === 'enemy') {
+      var dx =  Math.sin(Math.random() * 2 * Math.PI) * array[i].speed
+      var dy = -Math.cos(Math.random() * 2 * Math.PI) * array[i].speed
+      array[i].x += dx
+      array[i].y += dy
+    }
+  }
+}
+
 function printKeys() {
     var html = '';
     for (var i in keyListener.keyList()) {
@@ -164,8 +179,8 @@ function printKeys() {
     $('#out').html(html);
 }
 
-
-setInterval(drawElements, 1000 / 60)
+drawElements()
+// setInterval(drawElements, 1000 / 60)
 
 
 
