@@ -9,6 +9,9 @@ function drawElements () {
   shape2.shotIncrement()
   bothPlayersDoThis(movePlayer)
   collisionHappening()
+  checkWin(enemiesLeft())
+  checkLoss(playersLeft())
+  console.log(enemiesLeft())
 
   requestAnimationFrame(drawElements)
 }
@@ -55,6 +58,31 @@ function outOfBounds (object) {
   }
 }
 
+function enemiesLeft () {
+  var all = onGameBoard.getAllCharacters()
+  var number = 0
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].type === 'enemy') {
+      number++
+    }
+  }
+  return number
+}
+
+function playersLeft () {
+  var all = onGameBoard.getAllCharacters()
+  var number = 0
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].type === 'player') {
+      number++
+      if (number === 2) {
+        break
+      }
+    }
+  }
+  return number
+}
+
 ////////////////////////////KEY LISTENERS///////////////////////////////
 $(document).keydown(function(e) {
   keyListener.down(e)
@@ -86,8 +114,12 @@ function movePlayer (player) {
   var keys    = keyListener.keyList()
   var control = player.controls
   var counter = 0
-  var dx      =  Math.sin(player.rotate) * player.speed
-  var dy      = -Math.cos(player.rotate) * player.speed
+  var dx      =  Math.floor(Math.sin(player.rotate) * player.speed)
+  var dy      = Math.floor(-Math.cos(player.rotate) * player.speed)
+
+  if (keys['13']) {
+    location.reload()
+  }
 
   if (keys[control.shoot]) {
     player.shoot(player)
@@ -164,20 +196,20 @@ function moveEnemies () {
     var enemy = array[i]
     if (enemy.type === 'enemy') {
       enemy.shotIncrement()
-      if (Math.random() > .95) {
+      if (Math.random() > 0.95) {
         var randomDirection = Math.random() * 2 * Math.PI
         enemy.rotate = randomDirection
         enemy.dx     =  Math.sin(randomDirection) * enemy.speed
         enemy.dy     = -Math.cos(randomDirection) * enemy.speed
       }
-      if (Math.random() > .3) {
+      if (Math.random() > 0.3) {
         enemy.x += enemy.dx
         enemy.y += enemy.dy
         if (outOfBounds(enemy)) {
           enemy.x -= enemy.dx
           enemy.y -= enemy.dy
         }
-      } else if (Math.random() > .4) {
+      } else if (Math.random() > 0.4) {
         enemy.shoot(enemy)
       }
     }

@@ -30,6 +30,7 @@ var createCharacter = (function () {
   var speed = 2
   var size  = 20
   var lives = 3
+  var life  = 1
 
   return {
     init: function () {
@@ -41,6 +42,7 @@ var createCharacter = (function () {
       shape.height      = size
       shape.width       = size
       shape.rotate      = 0
+      shape.life        = life
       shape.gun         = powerUps.guns.standard
       shape.shield      = powerUps.shields.noShield
       shape.shotFrames  = 1
@@ -56,6 +58,14 @@ var createCharacter = (function () {
           bullet.player = s
           onGameBoard.addCharacter(bullet)
           s.shotFrames = 0
+        }
+      }
+      shape.hit   = function (shape, bullet) {
+        if (bullet.type !== shape.type) {
+          shape.life--
+          if (shape.life <= 0) {
+            onGameBoard.removeCharacter(shape)
+          }
         }
       }
       shape.color
@@ -85,12 +95,11 @@ var createCharacter = (function () {
       b.player
       return b
     },
-    enemy: function (shape, size, speed, value, x, y) {
+    enemy: function (shape, size, speed, x, y) {
       var e   = this.init()
       e.type  = 'enemy'
       e.shape = shape
       e.speed = speed
-      e.value = value
       e.x     = x
       e.y     = y
       e.dx    = e.speed
@@ -164,13 +173,24 @@ function setStartPosition (player1, player2) {
   }
 }
 
-function spawnEnemy (shape, size, speed, value) {
+function spawnEnemy (shape, size, speed, life, r, g, b) {
   var shapes = ['diamond', 'square', 'triangle']
   var randomShape = shapes[Math.random() * shapes.length]
-  var x = Math.random() * c.canvas.width - size
-  var y = Math.random() * c.canvas.height - size
+  var x = size + Math.random() * c.canvas.width - size
+  var y = size + Math.random() * c.canvas.height - size
+  if (Math.abs(shape1.x - x) < 60 || Math.abs(shape1.y - y) < 60) {
+    return spawnEnemy(shape, size, speed, life)
+  }
+  if (Math.abs(shape2.x - x) < 60 || Math.abs(shape2.y - y) < 60) {
+    return spawnEnemy(shape, size, speed, life)
+  }
+  var enemy = createCharacter.enemy(shape, size, speed, life, x, y)
+  enemy.color = 'rgb('+r+' ,'+g+' ,'+b+')'
 
-  createCharacter.enemy(shape, size, speed, value, x, y)
+  var dx    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
+  var dy    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
+  enemy.dx  = dx
+  enemy.dy  = dy
 }
 
 function startGame (player1, player2) {
@@ -185,7 +205,10 @@ shape2.color = '#DD9500'
 startGame(shape1, shape2)
 
 for (var i = 0; i < 10; i++) {
-  spawnEnemy('diamond', 30, 2, 10)
+  var r = Math.round(Math.random() * 255)
+  var g = Math.round(Math.random() * 255)
+  var b = Math.round(Math.random() * 255)
+  spawnEnemy('diamond', 30, 2, 10/*, r, g, b*/)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -248,8 +271,7 @@ var drawThis = (function () {
 
 function collisionBetween (a, b) {
   if (a.type === 'player' && b.type === 'enemy') {
-    console.log('enemy hit player')
-    onGameBoard.removeCharacter(a)
+    a.hit(a, b)
     return true
   }
 
@@ -257,12 +279,12 @@ function collisionBetween (a, b) {
   if (a.type === 'bullet') {
     // make sure that the collision is not the object shooting bullet
     if (a.player !== b) {
-      console.log(b.type + ' got hit!!')
+      // console.log(b.type + ' got hit!!')
       // check if object hit is an enemy
       if (b.type === 'enemy') {
         // check that enemy did not hit another enemy
         if (a.player.type !== b.type && b.type === 'enemy') {
-          console.log('BOOM!')
+          // console.log('BOOM!')
           onGameBoard.removeCharacter(a)
           onGameBoard.removeCharacter(b)
           return true
@@ -271,7 +293,7 @@ function collisionBetween (a, b) {
         onGameBoard.removeCharacter(a)
         return true
       } else if (b.type === 'player') {
-        console.log('DEAD!')
+        // console.log('DEAD!')
         onGameBoard.removeCharacter(a)
         onGameBoard.removeCharacter(b)
         return true
@@ -280,7 +302,17 @@ function collisionBetween (a, b) {
   }
 }
 
+function checkWin (enemies) {
+  if (enemies === 0) {
+    console.log('All enemies gone!')
+  }
+}
 
+function checkLoss (players) {
+  if (players === 0) {
+    console.log('All players dead!')
+  }
+}
 
 
 
