@@ -117,10 +117,10 @@ var keyListener = (function () {
 })()
 
 function movePlayer (player) {
-  if (!player) return
+  // a quick way to refresh the page
+  var keys    = keyListener.keyList()
   var player1 = onGameBoard.player(1)
   var player2 = onGameBoard.player(2)
-  var keys    = keyListener.keyList()
   var control = player.controls
   var counter = 0
   var dx      =  Math.floor(Math.sin(player.rotate) * player.speed)
@@ -129,6 +129,8 @@ function movePlayer (player) {
   if (keys['13']) {
     location.reload()
   }
+  // if the player does not exist, DON'T DO ANYTHING!!!
+  if (!player) return
 
   if (keys[control.shoot]) {
     player.shoot(player)
