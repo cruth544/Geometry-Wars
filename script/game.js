@@ -60,12 +60,24 @@ var createCharacter = (function () {
           s.shotFrames = 0
         }
       }
-      shape.hit   = function (shape, bullet) {
-        if (bullet.type !== shape.type) {
-          shape.life--
-          if (shape.life <= 0) {
-            onGameBoard.removeCharacter(shape)
+      shape.hit   = function (self) {
+        self.life--
+        if (!self.life) {
+          onGameBoard.removeCharacter(self)
+        }
+      }
+      shape.onHit   = function (shape, hitter) {
+        //first check to see if both shapes are of same type
+        if (hitter.type !== shape.type) {
+          //check to see if hitter is a bullet
+          if (hitter.type === 'bullet') {
+            onGameBoard.removeCharacter(hitter)
+          } else {
+          //if its not a bullet...
+            hitter.hit(hitter)
           }
+          //do hit calculations
+          shape.hit(shape)
         }
       }
       shape.color
@@ -208,7 +220,7 @@ for (var i = 0; i < 10; i++) {
   var r = Math.round(Math.random() * 255)
   var g = Math.round(Math.random() * 255)
   var b = Math.round(Math.random() * 255)
-  spawnEnemy('diamond', 30, 2, 10/*, r, g, b*/)
+  spawnEnemy('diamond', 30, 2, 1/*, r, g, b*/)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -270,36 +282,56 @@ var drawThis = (function () {
 })()
 
 function collisionBetween (a, b) {
-  if (a.type === 'player' && b.type === 'enemy') {
-    a.hit(a, b)
-    return true
-  }
-
-  // type a is a bullet
-  if (a.type === 'bullet') {
-    // make sure that the collision is not the object shooting bullet
-    if (a.player !== b) {
-      // console.log(b.type + ' got hit!!')
-      // check if object hit is an enemy
-      if (b.type === 'enemy') {
-        // check that enemy did not hit another enemy
-        if (a.player.type !== b.type && b.type === 'enemy') {
-          // console.log('BOOM!')
-          onGameBoard.removeCharacter(a)
-          onGameBoard.removeCharacter(b)
-          return true
-        }
-        //if it did hit an enemy, remove the bullet
-        onGameBoard.removeCharacter(a)
-        return true
-      } else if (b.type === 'player') {
-        // console.log('DEAD!')
-        onGameBoard.removeCharacter(a)
-        onGameBoard.removeCharacter(b)
-        return true
-      }
+  //all cases where player is hit by something
+  if (a.type === 'player') {
+    if (b.type === 'enemy') {
+      a.hit(a, b)
+      return true
+    }
+    if (b.type === 'bullet') {
+      a.hit(a, b)
+      return true
     }
   }
+
+  // all cases where enemy is hit by something
+  if (a.type === 'enemy') {
+    if (b.type === 'bullet') {
+      a.hit(a, b)
+      return true
+    }
+  }
+
+  // if (a.type === 'player' && b.type === 'enemy') {
+  //   a.hit(a, b)
+  //   return true
+  // }
+  //
+  // type a is a bullet
+  // if (a.type === 'bullet') {
+  //   // make sure that the collision is not the object shooting bullet
+  //   if (a.player !== b) {
+  //     // console.log(b.type + ' got hit!!')
+  //     // check if object hit is an enemy
+  //     if (b.type === 'enemy') {
+  //       // check that enemy did not hit another enemy
+  //       if (a.player.type !== b.type && b.type === 'enemy') {
+  //         // console.log('BOOM!')
+  //         onGameBoard.removeCharacter(a)
+  //         onGameBoard.removeCharacter(b)
+  //         return true
+  //       }
+  //       //if it did hit an enemy, remove the bullet
+  //       onGameBoard.removeCharacter(a)
+  //       return true
+  //     } else if (b.type === 'player') {
+  //       // console.log('DEAD!')
+  //       onGameBoard.removeCharacter(a)
+  //       onGameBoard.removeCharacter(b)
+  //       return true
+  //     }
+  //   }
+  // }
 }
 
 function checkWin (enemies) {
