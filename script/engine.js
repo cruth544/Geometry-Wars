@@ -13,8 +13,17 @@ function drawElements () {
   if (player2) player2.shotIncrement()
   bothPlayersDoThis(movePlayer)
   collisionHappening()
+  if (Math.random() > 0.9985) {
+    spawnPowerUp()
+  }
   if (Math.random() > 0.997) {
-    spawnEnemy('diamond', 30, 2, 1, 'enemy'/*, r, g, b*/)
+    if (gameMode.isBoss()) {
+      if (Math.random() > 0.01) {
+        // spawnEnemy('diamond', 30, 2, 1, 'enemy', 0, 0, 255)
+      }
+    } else {
+      // spawnEnemy('diamond', 30, 2, 1, 'enemy', 0, 0, 255)
+    }
   }
   checkWin(enemiesLeft())
   checkLoss(playersLeft())
@@ -45,12 +54,12 @@ function collisionHappening () {
         }
       }
       var a = { x: all[i].x, y: all[i].y,
-                w: all[i].width / 2, h: all[i].height / 2}
+                w: all[i].width, h: all[i].height}
       var b = { x: all[j].x, y: all[j].y,
-                w: all[j].width / 2, h: all[j].height / 2}
+                w: all[j].width, h: all[j].height}
 
-      if (a.x + a.w > b.x - b.w && a.x - a.w < b.x + b.w) {
-        if (a.y + a.h > b.y - b.h && a.y - a.h < b.y + b.h) {
+      if (a.x + a.w > b.x && a.x < b.x + b.w) {
+        if (a.y + a.h > b.y && a.y < b.y + b.h) {
           if (collisionBetween(all[i], all[j])) return
         }
       }

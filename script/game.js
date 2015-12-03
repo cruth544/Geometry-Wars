@@ -74,7 +74,8 @@ var createCharacter = (function () {
       shape.gun         = powerUps.guns.standard
       shape.shield      = powerUps.shields.noShield
       shape.shotFrames  = 1
-      shape.equipGun       = function (gun) {
+      shape.equipGun    = function (gun) {
+        clearTimeout(shape.gunTimer)
         shape.gun = gun
         shape.gunTimer(gun.timer)
       }
@@ -131,7 +132,7 @@ var createCharacter = (function () {
           hitter.hit(hitter)
         }
       }
-      shape.color
+
       return shape
     },
     player: function (shape, controls) {
@@ -178,6 +179,7 @@ var createCharacter = (function () {
       e.dx     = e.speed
       e.dy     = e.speed
       e.life   = life
+
       onGameBoard.addCharacter(e)
       return e
     },
@@ -188,17 +190,40 @@ var createCharacter = (function () {
       boss.x            = x
       boss.y            = y
       boss.gun          = powerUps.guns.cannon
-      boss.gun.rate     = 0.6
-      boss.gun.speed    = 4
+      boss.gun.rate     = 0.7
+      boss.gun.speed    = 3
       boss.gun.capacity = 999999999
       boss.color        = 'rgb('+r+', '+g+', '+b+')'
 
+      onGameBoard.addCharacter(boss)
       return boss
     },
-    powerUp: function (type) {
+    powerUp: function (item, size, x, y) {
       var powerUp   = this.init()
       powerUp.type  = 'powerUp'
+      powerUp.item  = powerUps.guns[item]
+      powerUp.size  = size
+      powerUp.color = 'rgb(0, 255, 0)'
+      powerUp.x     = x
+      powerUp.y     = y
+      powerUp.onHit = function (self, hitter) {
+        if (  hitter.type === 'bullet'
+          ||  hitter.type === 'powerUp'
+          ||  hitter.isBoss) {return}
 
+        hitter.equipGun(self.item)
+        self.pickedUp()
+      }
+      powerUp.pickedUp = function () {
+        onGameBoard.removeCharacter(powerUp)
+      }
+      powerUp.timer = (function () {
+        setTimeout(function () {
+          onGameBoard.removeCharacter(powerUp)
+        }, powerUp.item.timer * 1000)
+      })()
+
+      onGameBoard.addCharacter(powerUp)
       return powerUp
     }
   }
@@ -232,8 +257,8 @@ var powerUps = (function () {
     guns: {
       standard:   new GunBase(2, 4, 1, 999999999, 15),
       machineGun: new GunBase(2, 4, 0.1, 50, 15),
-      cannon:     new GunBase(10, 2, 2, 10, 30),
-      laser:      new GunBase(1, 10, .001, 500, 15)
+      cannon:     new GunBase(12, 2, 2, 10, 30),
+      laser:      new GunBase(1, 7, .001, 500, 5)
     },
     shields: {
       noShield: null
@@ -277,6 +302,9 @@ var onGameBoard = (function () {
   }
 })()
 
+
+
+//////////////////////////////START GAME////////////////////////////////
 var players     = (function () {
   var player1   = createCharacter.player('triangle', controls.player1)
   player1.color = '#0095DD'
@@ -285,13 +313,11 @@ var players     = (function () {
   player2.color = '#DD9500'
   player2.equipGun(powerUps.guns.standard)
 
-  onGameBoard.addCharacter(player1)
-  onGameBoard.addCharacter(player2)
   startGame(player1, player2)
 
   //start out with 5 enemies
   for (var i = 0; i < 5; i++) {
-    spawnEnemy('diamond', 30, 2, 1, 'enemy'/*, r, g, b*/)
+    // spawnEnemy('diamond', 30, 2, 1, 'enemy', 0, 0, 255)
   }
 })()
 ////////////////////////////////////////////////////////////////////////
@@ -325,7 +351,7 @@ function spawnEnemy (shape, size, speed, life, enemyType, r, g, b) {
     return spawnEnemy(shape, size, speed, life, enemyType, r, g, b)
   }
   var enemy = createCharacter[enemyType](shape, size, speed, life, x, y)
-  // enemy.color = 'rgb('+r+' ,'+g+' ,'+b+')'
+  enemy.color = 'rgb('+r+' ,'+g+' ,'+b+')'
 
   var dx    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
   var dy    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
@@ -334,16 +360,14 @@ function spawnEnemy (shape, size, speed, life, enemyType, r, g, b) {
 }
 
 function spawnPowerUp () {
-  var x = Math.random() * (c.canvas.width - size)
-  var y = Math.random() * (c.canvas.height - size)
+  // var type    = ['guns', 'shields']
+  var guns    = ['machineGun', 'cannon', 'laser']
+  var sizes   = [5, 10, 3]
+  var pick    = Math.floor(Math.random() * guns.length)
+  var x       = Math.random() * (c.canvas.width - sizes[pick])
+  var y       = Math.random() * (c.canvas.height - sizes[pick])
 
-}
-
-for (var i = 0; i < 10; i++) {
-  var r = Math.round(Math.random() * 255)
-  var g = Math.round(Math.random() * 255)
-  var b = Math.round(Math.random() * 255)
-  // spawnEnemy('diamond', 30, 2, 1, 'enemy'/*, r, g, b*/)
+  createCharacter.powerUp(guns[pick], sizes[pick], x, y)
 }
 
 function startGame (player1, player2) {
@@ -430,12 +454,20 @@ function collisionBetween (a, b) {
       a.onHit(a, b)
       return true
     }
+    if (b.type === 'powerUp') {
+      b.onHit(b, a)
+      return true
+    }
   }
 
   // all cases where enemy is hit by something
   if (a.type === 'enemy') {
     if (b.type === 'bullet') {
       a.onHit(a, b)
+      return true
+    }
+    if (b.type === 'powerUp') {
+      b.onHit(b, a)
       return true
     }
   }
@@ -449,11 +481,11 @@ function collisionBetween (a, b) {
 function checkWin (enemies) {
   if (enemies === 0) {
     if (gameMode.isBoss()) {
-      console.log('YOU WIN!!')
+      // console.log('YOU WIN!!')
       gameMode.setVersus(true)
     } else {
       gameMode.setBoss(true)
-      spawnEnemy('square', 60, 1, 10, 'boss', 255, 0, 0)
+      // spawnEnemy('square', 60, 1, 10, 'boss', 255, 0, 0)
     }
     // console.log('All enemies gone!')
   }
