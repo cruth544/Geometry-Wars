@@ -7,16 +7,16 @@ const COLOR_TWO       = '#DD9500'
 const START_GUN_TWO   = 'standard'
 
 const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
-const POWER_UP_SPAWN  = 0.995//0.9985
+const POWER_UP_SPAWN  = 0.9985
 
-const ENEMY_SPAWN     = false
+const ENEMY_SPAWN     = true
 const ENEMY_START     = 5
 const ENEMY_COLOR     = 'rgb(0, 0, 255)'
 const MOB_SPAWN       = 0.997
 
-const BOSS_SPAWN      = false
+const BOSS_SPAWN      = true
 const BOSS_COLOR      = 'rgb(255, 0, 0)'
-const BOSS_MOB_SPAWN  = 0.01
+const BOSS_MOB_SPAWN  = 0.9985
 
 const OUTLINE_SHAPES  = true
 
@@ -26,6 +26,8 @@ var c = (function () {
     ctx:    $('#game')[0].getContext('2d')
   }
 })()
+
+//////////////////////////////SETTINGS//////////////////////////////////
 
 var gameMode = (function () {
   var versus  = false
@@ -78,6 +80,8 @@ var controls = (function () {
   }
 })()
 
+///////////////////////////////TIMEOUTS/////////////////////////////////
+
 var currentTimeouts = (function () {
   var arrayOfTimeOuts = []
   var timeoutOwners   = []
@@ -117,7 +121,7 @@ var currentTimeouts = (function () {
   }
 })()
 
-////////////////////////////////////////////////////////////////////////
+/////////////////////////////SHAPE FACTORY//////////////////////////////
 
 var createCharacter = (function () {
   //default values
@@ -274,14 +278,16 @@ var createCharacter = (function () {
       }
     },
     powerUp: function (item, size, x, y) {
-      var powerUp   = this.init()
-      powerUp.type  = 'powerUp'
-      powerUp.item  = powerUps.guns[item]()
-      powerUp.size  = size
-      powerUp.color = 'rgb(0, 255, 0)'
-      powerUp.x     = x
-      powerUp.y     = y
-      powerUp.onHit = function (self, hitter) {
+      var powerUp     = this.init()
+      powerUp.type    = 'powerUp'
+      powerUp.item    = powerUps.guns[item]()
+      powerUp.size    = size
+      powerUp.height  = size
+      powerUp.width   = size
+      powerUp.color   = 'rgb(0, 255, 0)'
+      powerUp.x       = x
+      powerUp.y       = y
+      powerUp.onHit   = function (self, hitter) {
         if (  hitter.type === 'bullet'
           ||  hitter.type === 'powerUp'
           ||  hitter.isBoss) {return}
@@ -305,7 +311,7 @@ var createCharacter = (function () {
   }
 })()
 
-///////////////////////////Power Ups///////////////////////////////////
+//////////////////////////////POWER UPS//////////////////////////////////
 
 var powerUps = (function () {
   function setReady (rate) {
@@ -350,7 +356,7 @@ var powerUps = (function () {
   }
 })()
 
-////////////////////////////////////////////////////////////////////////
+/////////////////////////////ON GAME BOARD//////////////////////////////
 
 //keeps track of all objects on board
 var onGameBoard = (function () {
@@ -404,7 +410,8 @@ var players     = (function () {
     spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
   }
 })()
-////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////SPAWNS//////////////////////////////////
 
 function setStartPosition (player1, player2) {
   var x, y
@@ -459,7 +466,8 @@ function startGame (player1, player2) {
   setStartPosition(player1, player2)
 }
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////DRAW FUNCTIONS////////////////////////////////
+
 var drawThis = (function () {
   // q is much shorter than c.ctx
   var q = c.ctx
@@ -531,6 +539,8 @@ var drawThis = (function () {
   }
 })()
 
+////////////////////////COLLISION FUNCTIONS/////////////////////////////
+
 function collisionBetween (a, b) {
   //all cases where player is hit by something
   if (a.type === 'player') {
@@ -565,6 +575,8 @@ function collisionBetween (a, b) {
     return true
   }
 }
+
+////////////////////////////WIN LOSS FUNCTIONS////////////////////////////
 
 function checkWin (enemies) {
   if (enemies === 0) {
