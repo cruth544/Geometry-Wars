@@ -4,17 +4,39 @@
     <meta charset="utf-8">
     <title>Geometry Wars</title>
     <link rel="stylesheet" href="style/style.css">
+    <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
 
     </style>
     <script src="script/jquery-2.1.4.js"></script>
 </head>
 <body>
+  <br>
+  <header id="header" class="">
+    Geometry Wars
+  </header>
+  <br>
   <main>
-    <canvas id="game" top="50" width="480" height="320"></canvas>
+    <div id="start-screen">
+      <div id="settings">
+        <!-- <select id="playerAmount">
+          <option value="1">1 Player</option>
+          <option value="2" selected>2 Players</option>
+        </select>
+        <select id="Difficulty">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+          <option value="impossible">Impossible</option>
+        </select> -->
+          <div id="begin" onclick="startGame()">Begin</div>
+        </div>
+      </div>
+    <canvas id="game" top="50" width="1280" height="720"></canvas>
     <div id="out"></div>
   </main>
   <script src="script/physicsFunctions.js"></script>
   <script src="script/game.js"></script>
   <script src="script/engine.js"></script>
+  <script src="script/setup.js"></script>
 </body>
 </html>

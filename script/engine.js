@@ -1,32 +1,34 @@
 function drawElements () {
-  var player1 = onGameBoard.player(1)
-  var player2 = onGameBoard.player(2)
-  c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
-  for (var i = 0; i < onGameBoard.getAllCharacters().length; i++) {
-    var obj = onGameBoard.getAllCharacters()[i]
-    drawThis[obj.shape](obj)
-  }
+  if (!gameMode.isFrozen()) {
+    var player1 = onGameBoard.player(1)
+    var player2 = onGameBoard.player(2)
+    c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
+    for (var i = 0; i < onGameBoard.getAllCharacters().length; i++) {
+      var obj = onGameBoard.getAllCharacters()[i]
+      drawThis[obj.shape](obj)
+    }
 
-  moveEnemies()
-  if (player1) player1.shotIncrement()
-  if (player2) player2.shotIncrement()
-  bothPlayersDoThis(movePlayer)
-  collisionHappening()
-  if (Math.random() > POWER_UP_SPAWN) {
-    spawnPowerUp()
-  }
-  if (Math.random() > MOB_SPAWN) {
-    if (gameMode.isBoss()) {
-      if (Math.random() > BOSS_MOB_SPAWN) {
+    moveEnemies()
+    if (player1) player1.shotIncrement()
+    if (player2) player2.shotIncrement()
+    bothPlayersDoThis(movePlayer)
+    collisionHappening()
+    if (Math.random() > POWER_UP_SPAWN) {
+      spawnPowerUp()
+    }
+    if (Math.random() > MOB_SPAWN) {
+      if (gameMode.isBoss()) {
+        if (Math.random() > BOSS_MOB_SPAWN) {
+          spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
+        }
+      } else {
         spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
       }
-    } else {
-      spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
     }
-  }
-  checkWin(enemiesLeft())
-  checkLoss(playersLeft())
+    checkWin(enemiesLeft())
+    checkLoss(playersLeft())
 
+  }
   requestAnimationFrame(drawElements)
 }
 
@@ -292,6 +294,18 @@ function printKeys() {
     }
     $('#out').html(html);
 }
+
+setTimeout(function(){
+  var setUp = (function () {
+  $('#start-screen').css({
+    height: c.canvas.height,
+    width:  c.canvas.width,
+    top: c.canvas.offsetTop,
+    left: c.canvas.offsetLeft,
+    visibility: 'visible'
+  })
+})()
+}, 55);
 
 drawElements()
 

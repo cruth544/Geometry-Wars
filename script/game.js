@@ -10,7 +10,7 @@ const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
 const POWER_UP_SPAWN  = 0.9985
 
 const ENEMY_SPAWN     = true
-const ENEMY_START     = 5
+const ENEMY_START     = 10
 const ENEMY_COLOR     = 'rgb(0, 0, 255)'
 const MOB_SPAWN       = 0.997
 
@@ -33,7 +33,16 @@ var gameMode = (function () {
   var versus  = false
   var single  = false
   var boss    = false
+  var started = false
+  var freeze  = false
+
   return {
+    setStarted: function (bool) {
+      started = bool
+    },
+    hasStarted: function () {
+      return started
+    },
     setSingle:  function (bool) {
       single = bool
     },
@@ -51,6 +60,12 @@ var gameMode = (function () {
     },
     isBoss:     function () {
       return boss
+    },
+    freezeGame: function (bool) {
+      freeze = bool
+    },
+    isFrozen: function () {
+      return freeze
     }
   }
 })()
@@ -59,8 +74,42 @@ var settings = (function () {
   var difficulty
   var player1Color
   var player2Color
+  var player1Shape
+  var player2Shape
 
-})
+  return {
+    setDifficulty: function (newDifficulty) {
+      difficulty = newDifficulty
+    },
+    getDifficulty: function () {
+      return difficulty
+    },
+    setPlayer1Color: function (color) {
+      player1Color = color
+    },
+    getPlayer1Color: function () {
+      return player1Color
+    },
+    setPlayer2Color: function (color) {
+      player2Color = color
+    },
+    getPlayer2Color: function () {
+      return player2Color
+    },
+    setPlayer1Shape: function (shape) {
+      player1Shape = shape
+    },
+    getPlayer1Shape: function () {
+      return player1Shape
+    },
+    setPlayer2Shape: function (shape) {
+      player2Shape = shape
+    },
+    getPlayer2Shape: function () {
+      return player2Shape
+    }
+  }
+})()
 
 var controls = (function () {
   return {
@@ -190,10 +239,12 @@ var createCharacter = (function () {
             //check for shape shooting itself
             if (hitter.player === shape) return
               //make sure there is no friendly fire
-            if (hitter.player.type === shape.type) {
+            if (  hitter.player.type === shape.type
+              || !gameMode.hasStarted()) {
               onGameBoard.removeCharacter(hitter)
-              if (gameMode.isVersus()) {//versus mode
-                onGameBoard.removeCharacter(shape)
+              //versus mode
+              if (gameMode.isVersus() || !gameMode.hasStarted()) {
+                shape.hit(shape)
               }
               return
             }
@@ -395,7 +446,31 @@ var onGameBoard = (function () {
 
 
 //////////////////////////////START GAME////////////////////////////////
-var players     = (function () {
+var startScene  = (function () {
+  // shape, size, speed, life, x, y, color
+  var player1   = createCharacter.enemy(PLAYER_ONE, 20, 2, 2, 0, 0, COLOR_ONE)
+  var player2   = createCharacter.enemy(PLAYER_TWO, 20, 2, 2, 0, 0, COLOR_TWO)
+
+
+  setStartPosition(player1, player2)
+  //start out with 5 enemies
+  for (var i = 0; i < ENEMY_START; i++) {
+    spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
+  }
+})()
+
+function startGame () {
+  $('#begin').remove()
+
+  gameMode.freezeGame(true)
+  //remove everything on the board
+  var n = onGameBoard.getAllCharacters().length
+  for (var i = 0; i < n; i++) {
+    onGameBoard.removeCharacter(onGameBoard.getAllCharacters()[0])
+  }
+  gameMode.freezeGame(false)
+  gameMode.setStarted(true)
+
   var player1   = createCharacter.player(PLAYER_ONE, controls.player1)
   player1.color = COLOR_ONE
   player1.equipGun(powerUps.guns[START_GUN_ONE]())
@@ -403,13 +478,12 @@ var players     = (function () {
   player2.color = COLOR_TWO
   player2.equipGun(powerUps.guns[START_GUN_TWO]())
 
-  startGame(player1, player2)
-
+  setStartPosition(player1, player2)
   //start out with 5 enemies
   for (var i = 0; i < ENEMY_START; i++) {
     spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
   }
-})()
+}
 
 ////////////////////////////////SPAWNS//////////////////////////////////
 
@@ -433,13 +507,16 @@ function spawnEnemy (shape, size, speed, life, enemyType, color) {
   }
   var player1 = onGameBoard.player(1)
   var player2 = onGameBoard.player(2)
-  if (!player1 && !player2) return
 
-  if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
-    return spawnEnemy(shape, size, speed, life, enemyType, color)
+  if (player1) {
+    if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
+      return spawnEnemy(shape, size, speed, life, enemyType, color)
+    }
   }
-  if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
-    return spawnEnemy(shape, size, speed, life, enemyType, color)
+  if (player2) {
+    if (Math.abs(player2.x - x) < 60 || Math.abs(player2.y - y) < 60) {
+      return spawnEnemy(shape, size, speed, life, enemyType, color)
+    }
   }
   var enemy = createCharacter[enemyType](shape, size, speed, life, x, y, color)
 
@@ -462,9 +539,6 @@ function spawnPowerUp () {
   createCharacter.powerUp(guns[pick], sizes[pick], x, y)
 }
 
-function startGame (player1, player2) {
-  setStartPosition(player1, player2)
-}
 
 //////////////////////////DRAW FUNCTIONS////////////////////////////////
 
@@ -501,6 +575,7 @@ var drawThis = (function () {
   return {
     circle: function (shape) {
       beginDraw(shape)
+      // -x and -y are because we are using the same translateShape function and arc is different because it draws from the center, not top left
       q.arc(-x, -y, shape.size, 0, 2 * Math.PI)
       endDraw(shape)
     },
@@ -585,7 +660,7 @@ function checkWin (enemies) {
       gameMode.setVersus(true)
     } else {
       gameMode.setBoss(true)
-      if (BOSS_SPAWN) spawnEnemy('square', 60, 1, 10, 'boss', 255, 0, 0)
+      if (BOSS_SPAWN) spawnEnemy('square', 60, 1, 10, 'boss', BOSS_COLOR)
     }
     // console.log('All enemies gone!')
   }
@@ -593,7 +668,7 @@ function checkWin (enemies) {
 
 function checkLoss (players) {
   if (players === 0) {
-    // console.log('All players dead!')
+    $('#begin').fadeIn('slow', function() {})
   }
 }
 
