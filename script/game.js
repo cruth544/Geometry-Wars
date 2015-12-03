@@ -160,6 +160,11 @@ var createCharacter = (function () {
       b.player
       return b
     },
+    singlePlayer: function (gun, direction, x, y) {
+      var single = this.bullet(gun, direction, x, y)
+
+      return single
+    },
     enemy: function (shape, size, speed, life, x, y) {
       var e    = this.init()
       e.type   = 'enemy'
