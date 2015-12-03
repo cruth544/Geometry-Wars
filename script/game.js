@@ -18,6 +18,8 @@ const BOSS_SPAWN      = false
 const BOSS_COLOR      = 'rgb(255, 0, 0)'
 const BOSS_MOB_SPAWN  = 0.01
 
+const OUTLINE_SHAPES  = true
+
 var c = (function () {
   return {
     canvas: $('#game')[0],
@@ -51,6 +53,13 @@ var gameMode = (function () {
   }
 })()
 
+var settings = (function () {
+  var difficulty
+  var player1Color
+  var player2Color
+
+})
+
 var controls = (function () {
   return {
     player1: {
@@ -65,6 +74,45 @@ var controls = (function () {
       left:   '37',
       right:  '39',
       shoot:  '16'
+    }
+  }
+})()
+
+var currentTimeouts = (function () {
+  var arrayOfTimeOuts = []
+  var timeoutOwners   = []
+
+  return {
+    addTimeout: function (timeout, owner) {
+      arrayOfTimeOuts.push(timeout)
+      timeoutOwners.push(owner)
+    },
+    removeTimeout: function (shape) {
+      var index = timeoutOwners.indexOf(shape)
+      if (index > -1) {
+        arrayOfTimeOuts.splice(index, 1)
+        timeoutOwners.splice(index, 1)
+      }
+    },
+    getTimeout: function (timeout) {
+      var index = arrayOfTimeOuts.indexOf(timeout)
+      if (index > -1) {
+        return arrayOfTimeOuts[index]
+      }
+    },
+    getTimeoutFor: function (shape) {
+      var index = timeoutOwners.indexOf(shape)
+      if (index > -1) {
+        var timeout = arrayOfTimeOuts[index]
+        this.removeTimeout(timeoutOwners[index])
+        return timeout
+      }
+    },
+    getAllTimeouts: function () {
+      return arrayOfTimeOuts
+    },
+    getAllPlayerTimeouts: function () {
+      return timeoutOwners
     }
   }
 })()
@@ -95,16 +143,16 @@ var createCharacter = (function () {
       shape.shield      = powerUps.shields.noShield
       shape.shotFrames  = 1
       shape.equipGun    = function (gun) {
-        clearTimeout(shape.gunTimer)
+        clearTimeout(currentTimeouts.getTimeoutFor(shape))
         shape.gun = gun
         if (gun.timer < 10000) {
-          shape.gunTimer(gun.timer)
+          currentTimeouts.addTimeout(shape.gunTimer(gun.timer), shape)
         }
       }
       shape.gunTimer    = function (time) {
-        setTimeout(function () {
+        return setTimeout(function () {
           shape.equipGun(powerUps.guns.standard())
-        }, shape.gun.timer * 1000)
+        }, time * 1000)
       }
       shape.shotIncrement = function () {
         shape.shotFrames++
@@ -428,12 +476,15 @@ var drawThis = (function () {
   }
   //repeated end of drawing
   function endDraw (shape) {
-    q.lineWidth   = '2'
-    q.strokeStyle = shape.color
-    q.stroke()
-    // q.fillStyle = shape.color
-    // q.fill()
-    // q.closePath()
+    if (OUTLINE_SHAPES) {
+      q.lineWidth   = '2'
+      q.strokeStyle = shape.color
+      q.stroke()
+    } else {
+      q.fillStyle = shape.color
+      q.fill()
+      q.closePath()
+    }
     q.restore()
   }
   function translateShape (shape) {
