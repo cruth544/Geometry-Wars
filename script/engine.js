@@ -1,5 +1,4 @@
 function drawElements () {
-  c.canvas.backgroundColor = 'black'
   var player1 = onGameBoard.player(1)
   var player2 = onGameBoard.player(2)
   c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
@@ -13,16 +12,16 @@ function drawElements () {
   if (player2) player2.shotIncrement()
   bothPlayersDoThis(movePlayer)
   collisionHappening()
-  if (Math.random() > 0.9985) {
+  if (Math.random() > POWER_UP_SPAWN) {
     spawnPowerUp()
   }
-  if (Math.random() > 0.997) {
+  if (Math.random() > MOB_SPAWN) {
     if (gameMode.isBoss()) {
-      if (Math.random() > 0.01) {
-        // spawnEnemy('diamond', 30, 2, 1, 'enemy', 0, 0, 255)
+      if (Math.random() > BOSS_MOB_SPAWN) {
+        spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
       }
     } else {
-      // spawnEnemy('diamond', 30, 2, 1, 'enemy', 0, 0, 255)
+      spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
     }
   }
   checkWin(enemiesLeft())

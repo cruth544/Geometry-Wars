@@ -1,3 +1,23 @@
+const PLAYER_ONE      = 'triangle'
+const COLOR_ONE       = '#0095DD'
+const START_GUN_ONE   = 'standard'
+
+const PLAYER_TWO      = 'triangle'
+const COLOR_TWO       = '#DD9500'
+const START_GUN_TWO   = 'standard'
+
+const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
+const POWER_UP_SPAWN  = 0.995//0.9985
+
+const ENEMY_SPAWN     = false
+const ENEMY_START     = 5
+const ENEMY_COLOR     = 'rgb(0, 0, 255)'
+const MOB_SPAWN       = 0.997
+
+const BOSS_SPAWN      = false
+const BOSS_COLOR      = 'rgb(255, 0, 0)'
+const BOSS_MOB_SPAWN  = 0.01
+
 var c = (function () {
   return {
     canvas: $('#game')[0],
@@ -71,18 +91,20 @@ var createCharacter = (function () {
       shape.width       = size
       shape.rotate      = 0
       shape.life        = life
-      shape.gun         = powerUps.guns.standard
+      shape.gun         = powerUps.guns.standard()
       shape.shield      = powerUps.shields.noShield
       shape.shotFrames  = 1
       shape.equipGun    = function (gun) {
         clearTimeout(shape.gunTimer)
         shape.gun = gun
-        shape.gunTimer(gun.timer)
+        if (gun.timer < 10000) {
+          shape.gunTimer(gun.timer)
+        }
       }
       shape.gunTimer    = function (time) {
         setTimeout(function () {
-          shape.equipGun(powerUps.guns.standard)
-        }, time * 1000)
+          shape.equipGun(powerUps.guns.standard())
+        }, shape.gun.timer * 1000)
       }
       shape.shotIncrement = function () {
         shape.shotFrames++
@@ -90,7 +112,7 @@ var createCharacter = (function () {
       shape.shoot       = function (s) {
         if (s.shotFrames / (s.gun.rate * 60) >= 1) {
           if (s.gun.capacity <= 0) {
-            s.equipGun(powerUps.guns.standard)
+            s.equipGun(powerUps.guns.standard())
           }
           var bullet = createCharacter.bullet(s.gun,
                                               s.rotate,
@@ -166,42 +188,47 @@ var createCharacter = (function () {
 
       return single
     },
-    enemy: function (shape, size, speed, life, x, y) {
-      var e    = this.init()
-      e.type   = 'enemy'
-      e.shape  = shape
-      e.size   = size
-      e.height = size
-      e.width  = size
-      e.speed  = speed
-      e.x      = x
-      e.y      = y
-      e.dx     = e.speed
-      e.dy     = e.speed
-      e.life   = life
+    enemy: function (shape, size, speed, life, x, y, color) {
+      if (ENEMY_SPAWN) {
+        var e    = this.init()
+        e.type   = 'enemy'
+        e.color  = color
+        e.shape  = shape
+        e.size   = size
+        e.height = size
+        e.width  = size
+        e.speed  = speed
+        e.x      = x
+        e.y      = y
+        e.dx     = e.speed
+        e.dy     = e.speed
+        e.life   = life
 
-      onGameBoard.addCharacter(e)
-      return e
+        onGameBoard.addCharacter(e)
+        return e
+      }
     },
-    boss: function (shape, size, speed, life, x, y, r, g, b) {
-      var boss          = this.enemy(shape, size, speed, life, x, y)
-      boss.isBoss       = true
-      boss.target       = 1
-      boss.x            = x
-      boss.y            = y
-      boss.gun          = powerUps.guns.cannon
-      boss.gun.rate     = 0.7
-      boss.gun.speed    = 3
-      boss.gun.capacity = 999999999
-      boss.color        = 'rgb('+r+', '+g+', '+b+')'
+    boss: function (shape, size, speed, life, x, y, color) {
+      if (BOSS_SPAWN) {
+        var boss          = this.enemy(shape, size, speed, life, x, y)
+        boss.isBoss       = true
+        boss.target       = 1
+        boss.x            = x
+        boss.y            = y
+        boss.gun          = powerUps.guns.cannon()
+        boss.gun.rate     = 0.7
+        boss.gun.speed    = 3
+        boss.gun.capacity = 999999999
+        boss.color        = color
 
-      onGameBoard.addCharacter(boss)
-      return boss
+        onGameBoard.addCharacter(boss)
+        return boss
+      }
     },
     powerUp: function (item, size, x, y) {
       var powerUp   = this.init()
       powerUp.type  = 'powerUp'
-      powerUp.item  = powerUps.guns[item]
+      powerUp.item  = powerUps.guns[item]()
       powerUp.size  = size
       powerUp.color = 'rgb(0, 255, 0)'
       powerUp.x     = x
@@ -215,6 +242,7 @@ var createCharacter = (function () {
         self.pickedUp()
       }
       powerUp.pickedUp = function () {
+        clearTimeout(powerUp.timer)
         onGameBoard.removeCharacter(powerUp)
       }
       powerUp.timer = (function () {
@@ -229,7 +257,7 @@ var createCharacter = (function () {
   }
 })()
 
-////////////////////////////////////////////////////////////////////////
+///////////////////////////Power Ups///////////////////////////////////
 
 var powerUps = (function () {
   function setReady (rate) {
@@ -255,10 +283,18 @@ var powerUps = (function () {
 
   return {
     guns: {
-      standard:   new GunBase(2, 4, 1, 999999999, 15),
-      machineGun: new GunBase(2, 4, 0.1, 50, 15),
-      cannon:     new GunBase(12, 2, 2, 10, 30),
-      laser:      new GunBase(1, 7, .001, 500, 5)
+      standard:   function () {
+        return new GunBase(2, 4, 1, 999999999, 999999999)
+      },
+      machineGun: function () {
+        return new GunBase(2, 4, 0.1, 50, 15)
+      },
+      cannon: function  () {
+        return new GunBase(12, 2, 2, 10, 30)
+      },
+      laser: function () {
+        return new GunBase(1, 7, .001, 500, 5)
+      }
     },
     shields: {
       noShield: null
@@ -306,18 +342,18 @@ var onGameBoard = (function () {
 
 //////////////////////////////START GAME////////////////////////////////
 var players     = (function () {
-  var player1   = createCharacter.player('triangle', controls.player1)
-  player1.color = '#0095DD'
-  player1.equipGun(powerUps.guns.standard)
-  var player2   = createCharacter.player('triangle', controls.player2)
-  player2.color = '#DD9500'
-  player2.equipGun(powerUps.guns.standard)
+  var player1   = createCharacter.player(PLAYER_ONE, controls.player1)
+  player1.color = COLOR_ONE
+  player1.equipGun(powerUps.guns[START_GUN_ONE]())
+  var player2   = createCharacter.player(PLAYER_TWO, controls.player2)
+  player2.color = COLOR_TWO
+  player2.equipGun(powerUps.guns[START_GUN_TWO]())
 
   startGame(player1, player2)
 
   //start out with 5 enemies
-  for (var i = 0; i < 5; i++) {
-    // spawnEnemy('diamond', 30, 2, 1, 'enemy', 0, 0, 255)
+  for (var i = 0; i < ENEMY_START; i++) {
+    spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
   }
 })()
 ////////////////////////////////////////////////////////////////////////
@@ -332,7 +368,7 @@ function setStartPosition (player1, player2) {
   }
 }
 
-function spawnEnemy (shape, size, speed, life, enemyType, r, g, b) {
+function spawnEnemy (shape, size, speed, life, enemyType, color) {
   var x = Math.random() * (c.canvas.width - size)
   var y = Math.random() * (c.canvas.height - size)
   if (x < size) {
@@ -345,18 +381,19 @@ function spawnEnemy (shape, size, speed, life, enemyType, r, g, b) {
   if (!player1 && !player2) return
 
   if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
-    return spawnEnemy(shape, size, speed, life, enemyType, r, g, b)
+    return spawnEnemy(shape, size, speed, life, enemyType, color)
   }
   if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
-    return spawnEnemy(shape, size, speed, life, enemyType, r, g, b)
+    return spawnEnemy(shape, size, speed, life, enemyType, color)
   }
-  var enemy = createCharacter[enemyType](shape, size, speed, life, x, y)
-  enemy.color = 'rgb('+r+' ,'+g+' ,'+b+')'
+  var enemy = createCharacter[enemyType](shape, size, speed, life, x, y, color)
 
-  var dx    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
-  var dy    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
-  enemy.dx  = dx
-  enemy.dy  = dy
+  if (ENEMY_SPAWN) {
+    var dx    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
+    var dy    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
+    enemy.dx  = dx
+    enemy.dy  = dy
+  }
 }
 
 function spawnPowerUp () {
@@ -485,7 +522,7 @@ function checkWin (enemies) {
       gameMode.setVersus(true)
     } else {
       gameMode.setBoss(true)
-      // spawnEnemy('square', 60, 1, 10, 'boss', 255, 0, 0)
+      if (BOSS_SPAWN) spawnEnemy('square', 60, 1, 10, 'boss', 255, 0, 0)
     }
     // console.log('All enemies gone!')
   }
