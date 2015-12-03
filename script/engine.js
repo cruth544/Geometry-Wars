@@ -1,4 +1,5 @@
 function drawElements () {
+  c.canvas.backgroundColor = 'black'
   var player1 = onGameBoard.player(1)
   var player2 = onGameBoard.player(2)
   c.ctx.clearRect(0, 0, c.canvas.width, c.canvas.height)
@@ -6,14 +7,17 @@ function drawElements () {
     var obj = onGameBoard.getAllCharacters()[i]
     drawThis[obj.shape](obj)
   }
+
   moveEnemies()
   if (player1) player1.shotIncrement()
   if (player2) player2.shotIncrement()
   bothPlayersDoThis(movePlayer)
   collisionHappening()
+  if (Math.random() > 0.997) {
+    spawnEnemy('diamond', 30, 2, 1, 'enemy'/*, r, g, b*/)
+  }
   checkWin(enemiesLeft())
   checkLoss(playersLeft())
-  // console.log(enemiesLeft())
 
   requestAnimationFrame(drawElements)
 }
@@ -58,8 +62,8 @@ function outOfBounds (object) {
   if (object.x + object.width / 2 < 0 ||
       object.x + object.width / 2 > c.canvas.width) {
     return true
-  } else if ( object.y + object.height < 0 ||
-              object.y + object.height > c.canvas.height) {
+  } else if ( object.y + object.height / 2 < 0 ||
+              object.y + object.height / 2 > c.canvas.height) {
     return true
   }
 }
@@ -92,6 +96,10 @@ function playersLeft () {
 ////////////////////////////KEY LISTENERS///////////////////////////////
 $(document).keydown(function(e) {
   keyListener.down(e)
+  // a quick refresh of the page
+  if (e.keyCode === 13) {
+    location.reload()
+  }
 })
 $(document).keyup(function(e) {
   keyListener.up(e)
@@ -116,19 +124,16 @@ var keyListener = (function () {
   }
 })()
 
+////////////////////////////////MOVEMENT////////////////////////////////
 function movePlayer (player) {
-  // a quick way to refresh the page
   var keys    = keyListener.keyList()
   var player1 = onGameBoard.player(1)
   var player2 = onGameBoard.player(2)
   var control = player.controls
   var counter = 0
-  var dx      =  Math.floor(Math.sin(player.rotate) * player.speed)
-  var dy      = Math.floor(-Math.cos(player.rotate) * player.speed)
+  var dx      =  Math.sin(player.rotate) * player.speed
+  var dy      = -Math.cos(player.rotate) * player.speed
 
-  if (keys['13']) {
-    location.reload()
-  }
   // if the player does not exist, DON'T DO ANYTHING!!!
   if (!player) return
 
@@ -151,11 +156,12 @@ function movePlayer (player) {
       player.x += dx
       player.y += dy
 
-      if (outOfBounds(player)) {
-
+      if (player2 ? checkCollision(player1, player2) : false) {
+        player.x -= dx
+        player.y -= dy
+        return
       }
-      if (player2 ? checkCollision(player1, player2) : false
-        || outOfBounds(player)) {
+      if (outOfBounds(player)) {
         player.x -= dx
         player.y -= dy
         return
@@ -176,8 +182,14 @@ function movePlayer (player) {
       player.x += dx
       player.y += dy
 
-      if (player2 ? checkCollision(player1, player2) : false
-        || outOfBounds(player)) {
+      //check for collision with other player
+      if (player2 ? checkCollision(player1, player2) : false) {
+        player.x -= dx
+        player.y -= dy
+        return
+      }
+      //check if going out of bounds
+      if (outOfBounds(player)) {
         player.x -= dx
         player.y -= dy
         return
@@ -190,20 +202,28 @@ function movePlayer (player) {
     if (keys[control.left]) {
       player.rotate = -90 * Math.PI / 180
       player.x += dx
-      if (player2 ? checkCollision(player1, player2) : false
-        || outOfBounds(player)) {
+      if (player2 ? checkCollision(player1, player2) : false) {
         player.x -= dx
         return
       }
+      if (outOfBounds(player)) {
+        player.x -= dx
+        return
+      }
+      return
     }
     if (keys[control.right]) {
       player.rotate = 90 * Math.PI / 180
       player.x += dx
-      if (player2 ? checkCollision(player1, player2) : false
-        || outOfBounds(player)) {
+      if (player2 ? checkCollision(player1, player2) : false) {
         player.x -= dx
         return
       }
+      if (outOfBounds(player)) {
+        player.x -= dx
+        return
+      }
+      return
     }
   }
 }
@@ -214,11 +234,33 @@ function moveEnemies () {
     var enemy = array[i]
     if (enemy.type === 'enemy') {
       enemy.shotIncrement()
-      if (Math.random() > 0.95) {
-        var randomDirection = Math.random() * 2 * Math.PI
-        enemy.rotate = randomDirection
-        enemy.dx     =  Math.sin(randomDirection) * enemy.speed
-        enemy.dy     = -Math.cos(randomDirection) * enemy.speed
+      if (!enemy.isBoss) {
+        if (Math.random() > 0.95) {
+          var randomDirection = Math.random() * 2 * Math.PI
+          enemy.rotate = randomDirection
+          enemy.dx     =  Math.sin(randomDirection) * enemy.speed
+          enemy.dy     = -Math.cos(randomDirection) * enemy.speed
+        }
+      } else {
+        if (Math.random() > .9) {
+          enemy.target      = Math.ceil(Math.random() * playersLeft())
+        }
+        if (enemy.target === 0) return
+        var targetPlayer    = onGameBoard.player(enemy.target)
+
+        if (targetPlayer) {
+          var targetX       = targetPlayer.x + targetPlayer.width / 2
+          var targetY       = targetPlayer.y + targetPlayer.height / 2
+          var bossX         = enemy.x + enemy.width / 2
+          var bossY         = enemy.y + enemy.height / 2
+          var direction     = Math.atan2(targetY - bossY, targetX - bossX)
+          enemy.rotate      = direction + Math.PI / 2
+
+          if (Math.random() > .9) {
+            enemy.dx        = Math.cos(direction) * enemy.speed
+            enemy.dy        = Math.sin(direction) * enemy.speed
+          }
+        }
       }
       if (Math.random() > 0.3) {
         enemy.x += enemy.dx

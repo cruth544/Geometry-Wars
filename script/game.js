@@ -5,6 +5,32 @@ var c = (function () {
   }
 })()
 
+var gameMode = (function () {
+  var versus  = false
+  var single  = false
+  var boss    = false
+  return {
+    setSingle:  function (bool) {
+      single = bool
+    },
+    isSingle:   function () {
+      return single
+    },
+    setVersus:  function (bool) {
+      versus = bool
+    },
+    isVersus:   function () {
+      return versus
+    },
+    setBoss:    function (bool) {
+      boss = bool
+    },
+    isBoss:     function () {
+      return boss
+    }
+  }
+})()
+
 var controls = (function () {
   return {
     player1: {
@@ -31,11 +57,13 @@ var createCharacter = (function () {
   var size  = 20
   var lives = 3
   var life  = 1
+  var color = 'white'
 
   return {
     init: function () {
       var shape = {}
       shape.shape       = 'circle'
+      shape.color       = color
       shape.x           = 0
       shape.y           = 0
       shape.speed       = speed
@@ -46,16 +74,29 @@ var createCharacter = (function () {
       shape.gun         = powerUps.guns.standard
       shape.shield      = powerUps.shields.noShield
       shape.shotFrames  = 1
+      shape.equipGun       = function (gun) {
+        shape.gun = gun
+        shape.gunTimer(gun.timer)
+      }
+      shape.gunTimer    = function (time) {
+        setTimeout(function () {
+          shape.equipGun(powerUps.guns.standard)
+        }, time * 1000)
+      }
       shape.shotIncrement = function () {
         shape.shotFrames++
       }
       shape.shoot       = function (s) {
         if (s.shotFrames / (s.gun.rate * 60) >= 1) {
+          if (s.gun.capacity <= 0) {
+            s.equipGun(powerUps.guns.standard)
+          }
           var bullet = createCharacter.bullet(s.gun,
                                               s.rotate,
-                                              s.x - s.width / 2,
-                                              s.y - s.height / 2)
+                                              s.x + shape.width / 2,
+                                              s.y + shape.height / 2)
           bullet.player = s
+          s.gun.shoot()
           onGameBoard.addCharacter(bullet)
           s.shotFrames = 0
         }
@@ -76,7 +117,7 @@ var createCharacter = (function () {
               //make sure there is no friendly fire
             if (hitter.player.type === shape.type) {
               onGameBoard.removeCharacter(hitter)
-              if (false) {//versus mode
+              if (gameMode.isVersus()) {//versus mode
                 onGameBoard.removeCharacter(shape)
               }
               return
@@ -107,8 +148,10 @@ var createCharacter = (function () {
     bullet: function (gun, direction, x, y) {
       var b         = this.init()
       b.type        = 'bullet'
-      b.shape       = 'circle'
+      b.shape       = 'bullet'
       b.size        = gun.size
+      b.height      = gun.size
+      b.width       = gun.size
       b.speed       = gun.speed
       b.rate        = gun.rate
       b.x           = x
@@ -118,23 +161,45 @@ var createCharacter = (function () {
       return b
     },
     enemy: function (shape, size, speed, life, x, y) {
-      var e   = this.init()
-      e.type  = 'enemy'
-      e.shape = shape
-      e.speed = speed
-      e.x     = x
-      e.y     = y
-      e.dx    = e.speed
-      e.dy    = e.speed
-      e.life  = life
+      var e    = this.init()
+      e.type   = 'enemy'
+      e.shape  = shape
+      e.size   = size
+      e.height = size
+      e.width  = size
+      e.speed  = speed
+      e.x      = x
+      e.y      = y
+      e.dx     = e.speed
+      e.dy     = e.speed
+      e.life   = life
       onGameBoard.addCharacter(e)
       return e
+    },
+    boss: function (shape, size, speed, life, x, y, r, g, b) {
+      var boss          = this.enemy(shape, size, speed, life, x, y)
+      boss.isBoss       = true
+      boss.target       = 1
+      boss.x            = x
+      boss.y            = y
+      boss.gun          = powerUps.guns.cannon
+      boss.gun.rate     = 0.6
+      boss.gun.speed    = 4
+      boss.gun.capacity = 999999999
+      boss.color        = 'rgb('+r+', '+g+', '+b+')'
+
+      return boss
+    },
+    powerUp: function (type) {
+      var powerUp   = this.init()
+      powerUp.type  = 'powerUp'
+
+      return powerUp
     }
   }
 })()
 
 ////////////////////////////////////////////////////////////////////////
-
 
 var powerUps = (function () {
   function setReady (rate) {
@@ -142,14 +207,28 @@ var powerUps = (function () {
       return true
     }, rate * 1000)
   }
+  function timeOut (timer) {
+      setTimeout(function () {
+        return true
+      }, timer * 1000)
+    }
+
+  function GunBase (size, speed, rate, capacity, timer) {
+    this.size     = size
+    this.speed    = speed
+    this.rate     = rate
+    this.capacity = capacity
+    this.timer    = timer
+    this.isReady  = function () {setReady(this.rate)}
+    this.shoot    = function () {this.capacity--}
+  }
 
   return {
     guns: {
-      standard: {size:    2,
-                speed:    4,
-                rate:     1,
-                isReady:  function () {setReady(this.rate)},
-                capacity: 99999999 }
+      standard:   new GunBase(2, 4, 1, 999999999, 15),
+      machineGun: new GunBase(2, 4, 0.1, 50, 15),
+      cannon:     new GunBase(10, 2, 2, 10, 30),
+      laser:      new GunBase(1, 10, .001, 500, 15)
     },
     shields: {
       noShield: null
@@ -183,25 +262,31 @@ var onGameBoard = (function () {
       return activeCharacters
     },
     player: function (playerNumber) {
-      playerNumber--
-      if (activeCharacters[playerNumber].type === 'player') {
-        return activeCharacters[playerNumber]
+      if (activeCharacters.length >= playerNumber) {
+        playerNumber--
+        if (activeCharacters[playerNumber].type === 'player') {
+          return activeCharacters[playerNumber]
+        }
       }
     }
   }
 })()
 
-var players = (function () {
-  var player1 = createCharacter.player('triangle', controls.player1)
+var players     = (function () {
+  var player1   = createCharacter.player('triangle', controls.player1)
   player1.color = '#0095DD'
-  var player2 = createCharacter.player('square', controls.player2)
+  player1.equipGun(powerUps.guns.standard)
+  var player2   = createCharacter.player('triangle', controls.player2)
   player2.color = '#DD9500'
+  player2.equipGun(powerUps.guns.standard)
+
   onGameBoard.addCharacter(player1)
   onGameBoard.addCharacter(player2)
   startGame(player1, player2)
 
-  return {
-
+  //start out with 5 enemies
+  for (var i = 0; i < 5; i++) {
+    spawnEnemy('diamond', 30, 2, 1, 'enemy'/*, r, g, b*/)
   }
 })()
 ////////////////////////////////////////////////////////////////////////
@@ -216,26 +301,26 @@ function setStartPosition (player1, player2) {
   }
 }
 
-function spawnEnemy (shape, size, speed, life, r, g, b) {
-  var shapes = ['diamond', 'square', 'triangle']
-  var randomShape = shapes[Math.random() * shapes.length]
+function spawnEnemy (shape, size, speed, life, enemyType, r, g, b) {
   var x = Math.random() * (c.canvas.width - size)
   var y = Math.random() * (c.canvas.height - size)
   if (x < size) {
-    x + size
+    x += size
   } else if (y < size) {
-    y + size
+    y += size
   }
   var player1 = onGameBoard.player(1)
   var player2 = onGameBoard.player(2)
+  if (!player1 && !player2) return
+
   if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
-    return spawnEnemy(shape, size, speed, life)
+    return spawnEnemy(shape, size, speed, life, enemyType, r, g, b)
   }
   if (Math.abs(player1.x - x) < 60 || Math.abs(player1.y - y) < 60) {
-    return spawnEnemy(shape, size, speed, life)
+    return spawnEnemy(shape, size, speed, life, enemyType, r, g, b)
   }
-  var enemy = createCharacter.enemy(shape, size, speed, life, x, y)
-  enemy.color = 'rgb('+r+' ,'+g+' ,'+b+')'
+  var enemy = createCharacter[enemyType](shape, size, speed, life, x, y)
+  // enemy.color = 'rgb('+r+' ,'+g+' ,'+b+')'
 
   var dx    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
   var dy    = Math.random() * enemy.speed * 2 * (Math.random() - 0.5)
@@ -243,25 +328,22 @@ function spawnEnemy (shape, size, speed, life, r, g, b) {
   enemy.dy  = dy
 }
 
+function spawnPowerUp () {
+  var x = Math.random() * (c.canvas.width - size)
+  var y = Math.random() * (c.canvas.height - size)
+
+}
+
 for (var i = 0; i < 10; i++) {
   var r = Math.round(Math.random() * 255)
   var g = Math.round(Math.random() * 255)
   var b = Math.round(Math.random() * 255)
-  spawnEnemy('diamond', 30, 2, 1/*, r, g, b*/)
+  // spawnEnemy('diamond', 30, 2, 1, 'enemy'/*, r, g, b*/)
 }
 
 function startGame (player1, player2) {
   setStartPosition(player1, player2)
 }
-
-
-// var shape1 = createCharacter.player('triangle', controls.player1)
-// shape1.color = '#0095DD'
-
-// var shape2 = createCharacter.player('square', controls.player2)
-// shape2.color = '#DD9500'
-// startGame(shape1, shape2)
-
 
 ////////////////////////////////////////////////////////////////////////
 var drawThis = (function () {
@@ -280,15 +362,23 @@ var drawThis = (function () {
   }
   //repeated end of drawing
   function endDraw (shape) {
-    q.fillStyle = shape.color
-    q.fill()
-    q.closePath()
+    q.lineWidth   = '2'
+    q.strokeStyle = shape.color
+    q.stroke()
+    // q.fillStyle = shape.color
+    // q.fill()
+    // q.closePath()
     q.restore()
   }
   function translateShape (shape) {
-    q.translate(shape.x + shape.width / 2, shape.y + shape.height)
+    q.translate(shape.x + shape.width / 2, shape.y + shape.height / 2)
   }
   return {
+    circle: function (shape) {
+      beginDraw(shape)
+      q.arc(-x, -y, shape.size, 0, 2 * Math.PI)
+      endDraw(shape)
+    },
     square: function (shape) {
       beginDraw(shape)
       q.rect(-x, -y, shape.width, shape.height)
@@ -299,15 +389,7 @@ var drawThis = (function () {
       q.moveTo(0, -y)
       q.lineTo(x, y)
       q.lineTo(-x, y)
-      endDraw(shape)
-    },
-    circle: function (shape) {
-      beginDraw(shape)
-      var dx =  Math.sin(shape.direction) * shape.speed
-      var dy = -Math.cos(shape.direction) * shape.speed
-      shape.x += dx
-      shape.y += dy
-      q.arc(x, y, shape.size, 0, Math.PI * 2)
+      q.lineTo(0, -y)
       endDraw(shape)
     },
     diamond: function (shape) {
@@ -316,6 +398,17 @@ var drawThis = (function () {
       q.lineTo(x, 0)
       q.lineTo(0, y)
       q.lineTo(-x, 0)
+      q.lineTo(0, -y)
+      endDraw(shape)
+    },
+    bullet: function (shape) {
+      beginDraw(shape)
+      var dx =  Math.sin(shape.direction) * shape.speed
+      var dy = -Math.cos(shape.direction) * shape.speed
+      shape.x += dx
+      shape.y += dy
+      // -x and -y are because we are using the same translateShape function and arc is different because it draws from the center, not top left
+      q.arc(-x, -y, shape.size, 0, 2 * Math.PI)
       endDraw(shape)
     }
   }
@@ -350,6 +443,13 @@ function collisionBetween (a, b) {
 
 function checkWin (enemies) {
   if (enemies === 0) {
+    if (gameMode.isBoss()) {
+      console.log('YOU WIN!!')
+      gameMode.setVersus(true)
+    } else {
+      gameMode.setBoss(true)
+      spawnEnemy('square', 60, 1, 10, 'boss', 255, 0, 0)
+    }
     // console.log('All enemies gone!')
   }
 }
