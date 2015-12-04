@@ -16,16 +16,18 @@ function drawElements () {
     if (Math.random() > POWER_UP_SPAWN) {
       spawnPowerUp()
     }
-    if (Math.random() > MOB_SPAWN) {
-      if (gameMode.isBoss()) {
-        if (Math.random() > BOSS_MOB_SPAWN) {
+    if (!gameMode.isVersus()) {
+      if (Math.random() > MOB_SPAWN) {
+        if (gameMode.isBoss()) {
+          if (Math.random() > BOSS_MOB_SPAWN) {
+            spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
+          }
+        } else {
           spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
         }
-      } else {
-        spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
       }
     }
-    checkWin(enemiesLeft())
+    checkWin(enemiesLeft(), playersLeft())
     checkLoss(playersLeft())
 
   }
@@ -302,13 +304,14 @@ function printKeys() {
 
 setTimeout(function(){
   var setUp = (function () {
-  $('#start-screen').css({
-    height: c.canvas.height,
-    width:  c.canvas.width,
-    top: c.canvas.offsetTop,
-    left: c.canvas.offsetLeft,
-    visibility: 'visible'
-  })
+    $('#start-screen').css({
+      height: c.canvas.height,
+      width:  c.canvas.width,
+      top: c.canvas.offsetTop,
+      left: c.canvas.offsetLeft,
+      visibility: 'visible'
+    })
+    hideOverlaysThenShow($('#begin'))
 })()
 }, 55);
 

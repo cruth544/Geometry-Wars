@@ -7,18 +7,29 @@ const COLOR_TWO       = '#DD9500'
 const START_GUN_TWO   = 'standard'
 
 const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
-const POWER_UP_SPAWN  = 0.998
 
 const ENEMY_SPAWN     = true
-const ENEMY_START     = 10
 const ENEMY_COLOR     = 'rgb(0, 0, 255)'
 const MOB_SPAWN       = 0.997
 
-const BOSS_SPAWN      = true
 const BOSS_COLOR      = 'rgb(255, 0, 0)'
 const BOSS_MOB_SPAWN  = 0.9985
 
 const OUTLINE_SHAPES  = true
+
+//////////////PVP/////////////
+// const POWER_UP_SPAWN  = 0.995
+// const ENEMY_START     = 0
+// const BOSS_SPAWN      = false
+// const CONGRATS        = ''
+
+///////////////PVE///////////////
+const POWER_UP_SPAWN  = 0.997
+const ENEMY_START     = 8
+const BOSS_SPAWN      = true
+const CONGRATS        = 'CONGRATS!!'
+
+
 
 var c = (function () {
   return {
@@ -35,6 +46,7 @@ var gameMode = (function () {
   var boss    = false
   var started = false
   var freeze  = false
+  var congradulatiing = false
 
   return {
     setStarted: function (bool) {
@@ -66,6 +78,12 @@ var gameMode = (function () {
     },
     isFrozen: function () {
       return freeze
+    },
+    setCongradulating: function (bool) {
+      congradulatiing = bool
+    },
+    getCongradulating: function () {
+      return congradulatiing
     }
   }
 })()
@@ -395,7 +413,7 @@ var powerUps = (function () {
         return new GunBase(2, 4, 0.1, 50, 15)
       },
       cannon: function  () {
-        return new GunBase(12, 2, 2, 10, 30)
+        return new GunBase(12, 3, 2, 10, 30)
       },
       laser: function () {
         return new GunBase(1, 7, .001, 500, 5)
@@ -651,34 +669,88 @@ function collisionBetween (a, b) {
   }
 }
 
-////////////////////////////WIN LOSS FUNCTIONS////////////////////////////
+////////////////////////////WIN LOSS FUNCTIONS//////////////////////////
 
-function checkWin (enemies) {
+function checkWin (enemies, players) {
   if (enemies === 0) {
     if (gameMode.isBoss()) {
-      // console.log('YOU WIN!!')
-      gameMode.setVersus(true)
+      hideOverlaysThenShow($('#congrats'))
+      congratsFade(players)
+      gameMode.setCongradulating(true)
     } else {
       gameMode.setBoss(true)
-      if (BOSS_SPAWN) spawnEnemy('square', 60, 1, 10, 'boss', BOSS_COLOR)
+      if (BOSS_SPAWN) spawnEnemy('square', 60, 1, 20, 'boss', BOSS_COLOR)
     }
-    // console.log('All enemies gone!')
   }
 }
 
 function checkLoss (players) {
-  if (players === 0) {
-    // $('#begin').add()
-    // $('#begin').css('visibility', 'hidden');
-    // $('#begin').fadeIn('slow', function() {})
+  if (gameMode.isVersus()) {
+    if (players <= 1) {
+      var winner = onGameBoard.getAllCharacters()[0]
+      $('#playerWins').html('You<br>Win!!')
+      $('#playerWins').css({
+        color: winner.color,
+        borderColor: winner.color
+      })
+      hideOverlaysThenShow($('#playerWins'))
+    }
+  } else {
+    if (gameMode.hasStarted()) {
+      if (players === 0) {
+        hideOverlaysThenShow($('#game-over'))
+      }
+    }
   }
 }
 
+/////////////////////////////CSS FUNCTIONS///////////////////////////////
 
+function hideOverlaysThenShow (overlay) {
+  $('.overlay').css('visibility', 'hidden')
+  overlay.css('visibility', 'visible')
+}
 
+function hideOverlays (cssClass) {
+  $('.' + cssClass).css('visibility', 'hidden');
+}
 
-
-
+function congratsFade (players) {
+  if (!gameMode.getCongradulating()) {
+    var congrats = $('#congrats')
+    congrats.html(CONGRATS)
+    setTimeout(function () {
+      congrats.fadeOut('slow', function() {
+        if (players === 1) {
+          gameMode.setVersus(true)
+          return
+        }
+        congrats.html('READY?')
+        setTimeout(function () {
+          congrats.fadeIn('slow', function() {
+            setTimeout(function () {
+              congrats.fadeOut('slow', function() {
+                congrats.html('FIGHT')
+                congrats.css({
+                  color: '#900',
+                  fontSize: '150px'
+                });
+                setTimeout(function () {
+                  congrats.fadeIn('slow', function () {
+                    setTimeout(function () {
+                      congrats.fadeOut('slow')
+                      gameMode.setVersus(true)
+                    }, 1500)
+                  })
+                }, 800)
+              })
+            }, 500)
+          })
+        }, 1000)
+      })
+    }, 500)
+  }
+}
 
 
 

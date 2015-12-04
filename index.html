@@ -28,7 +28,10 @@
           <option value="hard">Hard</option>
           <option value="impossible">Impossible</option>
         </select> -->
-          <div id="begin" onclick="startGame()">Start</div>
+          <div id="begin" class="overlay" onclick="startGame()">Start</div>
+          <div id="playerWins" class="overlay"></div>
+          <div id="congrats" class="overlay">CONGRATS!!</div>
+          <div id="game-over" class="overlay">GAME<br>OVER</div>
         </div>
       </div>
     <canvas id="game" top="50" width="1280" height="720"></canvas>
@@ -37,6 +40,5 @@
   <script src="script/physicsFunctions.js"></script>
   <script src="script/game.js"></script>
   <script src="script/engine.js"></script>
-  <script src="script/setup.js"></script>
 </body>
 </html>
