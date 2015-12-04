@@ -142,7 +142,7 @@ var controls = (function () {
       down:   '76',
       left:   '75',
       right:  '186',
-      shoot:  '8'
+      shoot:  '16'
     }
   }
 })()

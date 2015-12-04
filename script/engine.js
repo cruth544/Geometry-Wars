@@ -129,11 +129,11 @@ var keyListener = (function () {
     down: function (e) {
       keys[e.which] = true
       e.preventDefault()
-      // printKeys()
+      printKeys()
     },
     up: function (e) {
       delete keys[e.which]
-      // printKeys()
+      printKeys()
     },
     keyList: function () {
       return keys
