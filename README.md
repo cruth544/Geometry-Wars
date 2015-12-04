@@ -19,4 +19,5 @@ Right:  ;<br>
 Shoot:  Delete<br>
 <br>
 This game primarily uses a custom Javascript Game Engine I designed for this game.<br>
-The game engine calculates all of the object's movement and draws them onto the Canvas element.
+The game engine calculates all of the object's movement and draws them onto the Canvas element.<br>
+Some unsolved problems are different bullet damage, single player mode, and a more robust menu/settings.<br>
