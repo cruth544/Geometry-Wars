@@ -7,7 +7,7 @@ const COLOR_TWO       = '#DD9500'
 const START_GUN_TWO   = 'standard'
 
 const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
-const POWER_UP_SPAWN  = 0.9985
+const POWER_UP_SPAWN  = 0.998
 
 const ENEMY_SPAWN     = true
 const ENEMY_START     = 10
@@ -120,11 +120,11 @@ var controls = (function () {
       right:  '68',
       shoot:  '32'
     }, player2: {
-      up:     '38',
-      down:   '40',
-      left:   '37',
-      right:  '39',
-      shoot:  '16'
+      up:     '79',
+      down:   '76',
+      left:   '75',
+      right:  '186',
+      shoot:  '8'
     }
   }
 })()
@@ -668,7 +668,9 @@ function checkWin (enemies) {
 
 function checkLoss (players) {
   if (players === 0) {
-    $('#begin').fadeIn('slow', function() {})
+    // $('#begin').add()
+    // $('#begin').css('visibility', 'hidden');
+    // $('#begin').fadeIn('slow', function() {})
   }
 }
 

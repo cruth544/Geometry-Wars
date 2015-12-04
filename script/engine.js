@@ -106,8 +106,13 @@ function playersLeft () {
 ////////////////////////////KEY LISTENERS///////////////////////////////
 $(document).keydown(function(e) {
   keyListener.down(e)
-  // a quick refresh of the page
   if (e.keyCode === 13) {
+    if ($('#begin').length > 0) {
+      startGame()
+    }
+  }
+  // a quick refresh of the page
+  if (e.keyCode === 85) {
     location.reload()
   }
 })
