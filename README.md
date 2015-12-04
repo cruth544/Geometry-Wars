@@ -1,6 +1,6 @@
 # Geometry-Wars
-This is my game.
-Trello: https://trello.com/b/Z2x5haIB/project-1
+<a href='http://cruth544.github.io/Geometry-Wars/'>Geometry Wars</a>
+<a href='https://trello.com/b/Z2x5haIB/project-1'>Trello</a>
 
 Controls:
 
