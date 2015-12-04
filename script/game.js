@@ -1,10 +1,10 @@
 const PLAYER_ONE      = 'triangle'
 const COLOR_ONE       = '#0095DD'
-const START_GUN_ONE   = 'standard'
+const START_GUN_ONE   = 'machineGun'
 
 const PLAYER_TWO      = 'triangle'
 const COLOR_TWO       = '#DD9500'
-const START_GUN_TWO   = 'standard'
+const START_GUN_TWO   = 'laser'
 
 const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
 
@@ -18,16 +18,16 @@ const BOSS_MOB_SPAWN  = 0.9985
 const OUTLINE_SHAPES  = true
 
 //////////////PVP/////////////
-// const POWER_UP_SPAWN  = 0.995
-// const ENEMY_START     = 0
-// const BOSS_SPAWN      = false
-// const CONGRATS        = ''
+const POWER_UP_SPAWN  = 0.995
+const ENEMY_START     = 0
+const BOSS_SPAWN      = false
+const CONGRATS        = ''
 
 ///////////////PVE///////////////
-const POWER_UP_SPAWN  = 0.997
-const ENEMY_START     = 8
-const BOSS_SPAWN      = true
-const CONGRATS        = 'CONGRATS!!'
+// const POWER_UP_SPAWN  = 0.997
+// const ENEMY_START     = 8
+// const BOSS_SPAWN      = true
+// const CONGRATS        = 'CONGRATS!!'
 
 
 
@@ -250,9 +250,13 @@ var createCharacter = (function () {
           s.shotFrames = 0
         }
       }
-      shape.hit   = function (self) {
-        self.life--
-        if (!self.life) {
+      shape.hit   = function (self, bullet) {
+        if (bullet) {
+          self.life -= bullet.damage
+          if (self.life <= 0) {
+            onGameBoard.removeCharacter(self)
+          }
+        } else {
           onGameBoard.removeCharacter(self)
         }
       }
@@ -269,7 +273,7 @@ var createCharacter = (function () {
               onGameBoard.removeCharacter(hitter)
               //versus mode
               if (gameMode.isVersus() || !gameMode.hasStarted()) {
-                shape.hit(shape)
+                shape.hit(shape, hitter.damage)
               }
               return
             }
@@ -278,7 +282,7 @@ var createCharacter = (function () {
             hitter.hit(hitter)
           }
           //do hit calculations
-          shape.hit(shape)
+          shape.hit(shape, hitter)
           hitter.hit(hitter)
         }
       }
@@ -305,6 +309,7 @@ var createCharacter = (function () {
       b.width       = gun.size
       b.speed       = gun.speed
       b.rate        = gun.rate
+      b.damage      = gun.damage
       b.x           = x
       b.y           = y
       b.direction   = direction
@@ -401,8 +406,9 @@ var powerUps = (function () {
       }, timer * 1000)
     }
 
-  function GunBase (size, speed, rate, capacity, timer) {
+  function GunBase (size, damage, speed, rate, capacity, timer) {
     this.size     = size
+    this.damage   = damage
     this.speed    = speed
     this.rate     = rate
     this.capacity = capacity
@@ -414,16 +420,16 @@ var powerUps = (function () {
   return {
     guns: {
       standard:   function () {
-        return new GunBase(2, 4, 1, 999999999, 999999999)
+        return new GunBase(2, 1, 4, 1, 999999999, 999999999)
       },
       machineGun: function () {
-        return new GunBase(2, 4, 0.1, 50, 15)
+        return new GunBase(2, 0.5, 4, 0.1, 50, 15)
       },
       cannon: function  () {
-        return new GunBase(12, 3, 2, 10, 30)
+        return new GunBase(12, 4, 3, 2, 10, 30)
       },
       laser: function () {
-        return new GunBase(1, 7, .001, 500, 5)
+        return new GunBase(1, 0.1, 7, .001, 500, 5)
       }
     },
     shields: {
