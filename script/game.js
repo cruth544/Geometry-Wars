@@ -46,6 +46,7 @@ var gameMode = (function () {
   var boss    = false
   var started = false
   var freeze  = false
+  var playerWon = false
   var congradulatiing = false
 
   return {
@@ -78,6 +79,12 @@ var gameMode = (function () {
     },
     isFrozen: function () {
       return freeze
+    },
+    setPlayerWon: function (bool) {
+      playerWon = bool
+    },
+    didPlayerWin: function () {
+      return playerWon
     },
     setCongradulating: function (bool) {
       congradulatiing = bool
@@ -479,6 +486,15 @@ var startScene  = (function () {
 
 function startGame () {
   $('#begin').remove()
+  gameMode.setPlayerWon(false)
+  gameMode.setVersus(false)
+  gameMode.setCongradulating(false)
+  if ($('#game-over').css('visibility') === 'visible') {
+    $('#game-over').css('visibility', 'hidden')
+  }
+  if ($('#playerWins').css('visibility') === 'visible') {
+    $('#playerWins').css('visibility', 'hidden');
+  }
 
   gameMode.freezeGame(true)
   //remove everything on the board
@@ -687,13 +703,36 @@ function checkWin (enemies, players) {
 function checkLoss (players) {
   if (gameMode.isVersus()) {
     if (players <= 1) {
-      var winner = onGameBoard.getAllCharacters()[0]
       $('#playerWins').html('You<br>Win!!')
-      $('#playerWins').css({
-        color: winner.color,
-        borderColor: winner.color
+      var winner = onGameBoard.player(1)
+      if (!winner) {
+        $('#playerWins').html('You<br>Win??')
+        winner = {color: '#0F0'}
+      }
+      if (!gameMode.didPlayerWin()) {
+        $('#playerWins').css({
+          color: winner.color,
+          borderColor: winner.color
+        })
+      }
+      $('#playerWins').hover(function() {
+        $('#playerWins').css({
+          cursor: 'pointer',
+          color: 'black',
+          borderColor: 'black',
+          backgroundColor: winner.color,
+          fontWeight: 'bold'
+        })
+      }, function() {
+        $('#playerWins').css({
+          color: winner.color,
+          borderColor: winner.color,
+          backgroundColor: 'transparent',
+          fontWeight: 'none'
+        })
       })
       hideOverlaysThenShow($('#playerWins'))
+      gameMode.setPlayerWon(true)
     }
   } else {
     if (gameMode.hasStarted()) {
@@ -704,7 +743,7 @@ function checkLoss (players) {
   }
 }
 
-/////////////////////////////CSS FUNCTIONS///////////////////////////////
+/////////////////////////////CSS FUNCTIONS//////////////////////////////
 
 function hideOverlaysThenShow (overlay) {
   $('.overlay').css('visibility', 'hidden')
@@ -725,6 +764,10 @@ function congratsFade (players) {
           gameMode.setVersus(true)
           return
         }
+        congrats.css({
+          color: 'white',
+          fontSize: '100px'
+        });
         congrats.html('READY?')
         setTimeout(function () {
           congrats.fadeIn('slow', function() {

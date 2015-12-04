@@ -29,9 +29,9 @@
           <option value="impossible">Impossible</option>
         </select> -->
           <div id="begin" class="overlay" onclick="startGame()">Start</div>
-          <div id="playerWins" class="overlay"></div>
+          <div id="playerWins" class="overlay" onclick="startGame()"></div>
           <div id="congrats" class="overlay">CONGRATS!!</div>
-          <div id="game-over" class="overlay">GAME<br>OVER</div>
+          <div id="game-over" class="overlay" onclick="startGame()">GAME<br>OVER</div>
         </div>
       </div>
     <canvas id="game" top="50" width="1280" height="720"></canvas>

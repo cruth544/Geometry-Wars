@@ -109,7 +109,9 @@ function playersLeft () {
 $(document).keydown(function(e) {
   keyListener.down(e)
   if (e.keyCode === 13) {
-    if ($('#begin').length > 0) {
+    if ($('#begin').length > 0
+      || $('#game-over').css('visibility') === 'visible'
+      || $('#playerWins').css('visibility') === 'visible') {
       startGame()
     }
   }
