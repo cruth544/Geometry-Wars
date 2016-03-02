@@ -17,7 +17,7 @@ canvas {
   height: 100px; }
 
 header {
-  font-family: font;
+  font-family: "Orbitron", sans-serif;
   font-size: 24px;
   color: white;
   text-align: center;
@@ -40,7 +40,7 @@ header {
 .overlay {
   width: 50vw;
   margin: 0 auto;
-  font-family: font;
+  font-family: "Orbitron", sans-serif;
   font-size: 80px;
   line-height: 115px;
   color: white;
