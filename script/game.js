@@ -17,7 +17,7 @@ const BOSS_MOB_SPAWN  = 0.9985
 
 const OUTLINE_SHAPES  = true
 
-//////////////PVP/////////////
+//////////////PVP////////////////
 // const POWER_UP_SPAWN  = 0.995
 // const ENEMY_START     = 0
 // const BOSS_SPAWN      = false
@@ -25,18 +25,26 @@ const OUTLINE_SHAPES  = true
 
 ///////////////PVE///////////////
 const POWER_UP_SPAWN  = 0.997
-const ENEMY_START     = 8
+const ENEMY_START     = window.innerHeight * window.innerWidth / (Math.sqrt(window.innerHeight) * Math.sqrt(window.innerWidth)) / 100
+console.log(Math.round(window.innerWidth * window.innerHeight / 100000))
 const BOSS_SPAWN      = true
 const CONGRATS        = 'CONGRATS!!'
 
 
 
 var c = (function () {
+  $('#game')[0].width = window.innerWidth * 0.98
+  $('#game')[0].height = window.innerHeight * 0.90
   return {
     canvas: $('#game')[0],
     ctx:    $('#game')[0].getContext('2d')
   }
 })()
+
+// window.addEventListener('onresize', function () {
+//   $('#game')[0].width = window.innerWidth * 0.98
+//   $('#game')[0].height = window.innerHeight * 0.85
+// })
 
 //////////////////////////////SETTINGS//////////////////////////////////
 
@@ -794,42 +802,3 @@ function congratsFade (players) {
     }, 500)
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

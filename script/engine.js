@@ -32,6 +32,15 @@ function drawElements () {
 
   }
   requestAnimationFrame(drawElements)
+
+
+  // refresh page (ctrl + r || cmd + r)
+  var keys = keyListener.keyList()
+  if (keys['82']) {
+    if (keys['17'] || keys['91'] || keys['92'] || keys['93']) {
+      location.reload()
+    }
+  }
 }
 
 function bothPlayersDoThis (callback) {
@@ -318,53 +327,3 @@ setTimeout(function(){
 }, 55);
 
 drawElements()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
