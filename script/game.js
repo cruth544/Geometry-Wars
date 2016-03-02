@@ -27,14 +27,14 @@ const OUTLINE_SHAPES  = true
 
 ///////////////PVE///////////////
 const POWER_UP_SPAWN  = 0.997
-const ENEMY_START     = window.innerHeight * window.innerWidth / (Math.sqrt(window.innerHeight) * Math.sqrt(window.innerWidth)) / 100
+const ENEMY_START     = window.innerHeight * document.body.clientWidth / (Math.sqrt(window.innerHeight) * Math.sqrt(document.body.clientWidth)) / 100
 const BOSS_SPAWN      = true
 const CONGRATS        = 'CONGRATS!!'
 
 
 
 var c = (function () {
-  $('#game')[0].width = window.innerWidth * 0.98
+  $('#game')[0].width = document.body.clientWidth * 0.98
   $('#game')[0].height = window.innerHeight * 0.85
   return {
     canvas: $('#game')[0],
