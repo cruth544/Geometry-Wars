@@ -1,9 +1,11 @@
+const TWO_PLAYER      = false
+
 const PLAYER_ONE      = 'triangle'
-const COLOR_ONE       = '#0095DD'
+const COLOR_ONE       = '#DD9500'
 const START_GUN_ONE   = 'standard'
 
 const PLAYER_TWO      = 'triangle'
-const COLOR_TWO       = '#DD9500'
+const COLOR_TWO       = '#0095DD'
 const START_GUN_TWO   = 'standard'
 
 const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
@@ -430,7 +432,7 @@ var powerUps = (function () {
         return new GunBase(12, 3, 2, 10, 30)
       },
       laser: function () {
-        return new GunBase(1, 7, .001, 500, 5)
+        return new GunBase(1, 7, 0.001, 500, 5)
       }
     },
     shields: {
@@ -481,10 +483,11 @@ var onGameBoard = (function () {
 var startScene  = (function () {
   // shape, size, speed, life, x, y, color
   var player1   = createCharacter.enemy(PLAYER_ONE, 20, 2, 2, 0, 0, COLOR_ONE)
-  var player2   = createCharacter.enemy(PLAYER_TWO, 20, 2, 2, 0, 0, COLOR_TWO)
+  if (TWO_PLAYER) {
+    var player2   = createCharacter.enemy(PLAYER_TWO, 20, 2, 2, 0, 0, COLOR_TWO)
+  }
 
-
-  setStartPosition(player1, player2)
+  setStartPosition(player1, TWO_PLAYER ? player2 : null)
   //start out with 5 enemies
   for (var i = 0; i < ENEMY_START; i++) {
     spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
@@ -515,11 +518,13 @@ function startGame () {
   var player1   = createCharacter.player(PLAYER_ONE, controls.player1)
   player1.color = COLOR_ONE
   player1.equipGun(powerUps.guns[START_GUN_ONE]())
-  var player2   = createCharacter.player(PLAYER_TWO, controls.player2)
-  player2.color = COLOR_TWO
-  player2.equipGun(powerUps.guns[START_GUN_TWO]())
+  if (TWO_PLAYER) {
+    var player2   = createCharacter.player(PLAYER_TWO, controls.player2)
+    player2.color = COLOR_TWO
+    player2.equipGun(powerUps.guns[START_GUN_TWO]())
+  }
 
-  setStartPosition(player1, player2)
+  setStartPosition(player1, TWO_PLAYER ? player2 : null)
   //start out with 5 enemies
   for (var i = 0; i < ENEMY_START; i++) {
     spawnEnemy('diamond', 30, 2, 1, 'enemy', ENEMY_COLOR)
@@ -532,7 +537,7 @@ function setStartPosition (player1, player2) {
   var x, y
   player1.x = c.canvas.width / 2 - player1.width
   player1.y = c.canvas.height / 2
-  if (arguments.length > 1) {
+  if (player2) {
     player2.x = c.canvas.width / 2 + player2.width
     player2.y = c.canvas.height / 2
   }
