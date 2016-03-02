@@ -26,7 +26,6 @@ const OUTLINE_SHAPES  = true
 ///////////////PVE///////////////
 const POWER_UP_SPAWN  = 0.997
 const ENEMY_START     = window.innerHeight * window.innerWidth / (Math.sqrt(window.innerHeight) * Math.sqrt(window.innerWidth)) / 100
-console.log(Math.round(window.innerWidth * window.innerHeight / 100000))
 const BOSS_SPAWN      = true
 const CONGRATS        = 'CONGRATS!!'
 
