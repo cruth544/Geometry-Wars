@@ -33,7 +33,7 @@ const CONGRATS        = 'CONGRATS!!'
 
 var c = (function () {
   $('#game')[0].width = window.innerWidth * 0.98
-  $('#game')[0].height = window.innerHeight * 0.90
+  $('#game')[0].height = window.innerHeight * 0.85
   return {
     canvas: $('#game')[0],
     ctx:    $('#game')[0].getContext('2d')
