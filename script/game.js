@@ -423,16 +423,16 @@ var powerUps = (function () {
   return {
     guns: {
       standard:   function () {
-        return new GunBase(2, 4, 1, 999999999, 999999999)
-      },
-      machineGun: function () {
-        return new GunBase(2, 4, 0.1, 50, 15)
+        return new GunBase(2, 4, 0.8, 999999999, 999999999)
       },
       cannon: function  () {
-        return new GunBase(12, 3, 2, 10, 30)
+        return new GunBase(12, 4, 1.5, 10, 25)
+      },
+      machineGun: function () {
+        return new GunBase(2, 5, 0.1, 100, 20)
       },
       laser: function () {
-        return new GunBase(1, 7, 0.001, 500, 5)
+        return new GunBase(1, 8, 0.001, 1000, 10)
       }
     },
     shields: {
