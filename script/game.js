@@ -12,7 +12,7 @@ const POWER_UP_COLOR  = 'rgb(0, 255, 0)'
 
 const ENEMY_SPAWN     = true
 const ENEMY_COLOR     = 'rgb(0, 0, 255)'
-const MOB_SPAWN       = 0.997
+const MOB_SPAWN       = 0.9985
 
 const BOSS_COLOR      = 'rgb(255, 0, 0)'
 const BOSS_MOB_SPAWN  = 0.9985
@@ -26,8 +26,8 @@ const OUTLINE_SHAPES  = true
 // const CONGRATS        = ''
 
 ///////////////PVE///////////////
-const POWER_UP_SPAWN  = 0.997
-const ENEMY_START     = window.innerHeight * document.body.clientWidth / (Math.sqrt(window.innerHeight) * Math.sqrt(document.body.clientWidth)) / 100
+const POWER_UP_SPAWN  = 0.996
+const ENEMY_START     = Math.max(5, Math.min(15, window.innerHeight * document.body.clientWidth / (Math.sqrt(window.innerHeight) * Math.sqrt(document.body.clientWidth)) / 150))
 const BOSS_SPAWN      = true
 const CONGRATS        = 'CONGRATS!!'
 
